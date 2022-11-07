@@ -1,0 +1,88 @@
+scripts:
+  clean:
+    desc: Clean the dist folder
+    cmd: npx rimraf dist
+  'cover:lcov':
+    desc: Run the tests coverage
+    cmd:
+      - vr test --coverage=dist/coverage
+      - deno coverage --include=src/main --lcov dist/coverage --output=dist/coverage/lcov.info
+  cover:
+    desc: Run the tests coverage and build the HTML report
+    cmd:
+      - vr cover:lcov
+      - genhtml -o dist/coverage/html dist/coverage/lcov.info
+  'cover:open':
+    desc: Open the tests coverage HTML report
+    cmd:
+      - npx opener dist/coverage/html/index.html
+  'demo':
+    desc: Start the demo server
+    cmd: demo/index.ts
+    allow:
+      - net
+      - read
+      - env
+      - run
+  'demo:production':
+    desc: Start the server in production mode
+    cmd: demo/index.ts
+    allow:
+      - net
+      - read
+      - env
+    cachedOnly: true
+  'demo:reload':
+    desc: Reload dependencies and start the server
+    cmd: demo/index.ts
+    allow:
+      - net
+      - read
+      - env
+    reload: true
+  'demo:watch':
+    desc: Start the server in watch mode
+    cmd: demo/index.ts
+    allow:
+      - net
+      - read
+      - env
+      - run
+    watch: true
+  'format:check':
+    cmd: npx prettier --check .
+    desc: Format the project sources
+  'format:fix':
+    cmd: npx prettier --write .
+    desc: Format the project sources
+  'git:pre-commit':
+    cmd:
+      - vr lint
+      - vr format
+    gitHook: pre-commit
+  lint:
+    cmd: deno lint
+    desc: Lint the project sources
+  test:
+    desc: Run the tests
+    cmd: deno test ./src/test
+    allow:
+      - net
+      - read
+      - env
+  'test:watch':
+    desc: Run the tests in watch mode
+    cmd: deno test ./src/test
+    allow:
+      - net
+      - read
+      - env
+    watch: true
+  validate:
+    desc: Validate the project
+    cmd:
+      - vr clean
+      - pll:
+          - vr lint
+          - vr format:check
+          - vr cover
