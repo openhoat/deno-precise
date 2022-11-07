@@ -1,0 +1,26 @@
+{
+  "version": "2",
+  "remote": {
+    "https://deno.land/std@0.132.0/fmt/colors.ts": "30455035d6d728394781c10755351742dd731e3db6771b1843f9b9e490104d37",
+    "https://deno.land/x/events@v1.0.0/mod.ts": "3e2655ffa5e86a6ee01022f964b7fdc6152c007106c47b02958e766c6614dbaf",
+    "https://deno.land/x/free_port@v1.2.0/mod.ts": "512646732aaea41fbfd1f210f3ae82660f38251777d189d290da331d0235a58e",
+    "https://deno.land/x/optic@1.3.5/deps.ts": "ceec710d3d45abede3e9209c67b4dcfc31ce962e7a08f4fe4c3eb79e3d6f8fd7",
+    "https://deno.land/x/optic@1.3.5/formatters/color.ts": "16ab0e63ed4ba8e2e52dc07651c8c5dd5d655b343bd402b4765f34aaa7c262ce",
+    "https://deno.land/x/optic@1.3.5/formatters/simpleDateTimeFormatter.ts": "5e8bc306982988c5a54b27945a0fe4fec77b38083c25d6960bd2eb69d51449d8",
+    "https://deno.land/x/optic@1.3.5/formatters/tokenReplacer.ts": "17a48b7aa99ac48997579ba1afc5a76389ff926822f4e1f3a968374b6d78e8e1",
+    "https://deno.land/x/optic@1.3.5/logger/dedupe.ts": "2e6124a7e1d5c85ad389af651450f50ae19be7bba5211577c9472e7a1f1f6406",
+    "https://deno.land/x/optic@1.3.5/logger/levels.ts": "f8c4d4438c49034679332a6a9a7e76f1f978629d2029a32e519556718088b890",
+    "https://deno.land/x/optic@1.3.5/logger/logRecord.ts": "6ce4053d9f306ba4cae19ccf195a5d3055ecfe697b728b794b1ecebf610ab98b",
+    "https://deno.land/x/optic@1.3.5/logger/logger.ts": "dc4c6c58cc9d5321cda5a11b649207354f2808755141ad24abcef8ebecd40450",
+    "https://deno.land/x/optic@1.3.5/logger/meta.ts": "59cb90177a63ef84e9000d2d4ab61dcdd2b8950179ce0cd44f5bccbe0b774d23",
+    "https://deno.land/x/optic@1.3.5/logger/profileMeasure.ts": "39d8a37badbff2efb91b1cedda9c4e7e7682e7a3b867b510f4fa5f4efd038678",
+    "https://deno.land/x/optic@1.3.5/logger/rateLimitContext.ts": "444d4f267004bc7a538ae6994c9b981f25eb6764e4e5f5e7bbc3a01fb35893e8",
+    "https://deno.land/x/optic@1.3.5/mod.ts": "633754a23b8732760c37324bce8da25f7ecb1fbf2910a529b854682173f2689a",
+    "https://deno.land/x/optic@1.3.5/streams/baseStream.ts": "ece6540105ff0bf16847dcdd6d23620cb75a7a9e0436d0d1eb9a2ef353c1f81a",
+    "https://deno.land/x/optic@1.3.5/streams/consoleStream.ts": "aed2237a126eb21c871e037b82e2b61a68178d4ad61a5b6f07d7e2a0bee1c441",
+    "https://deno.land/x/optic@1.3.5/types.ts": "9787afc1317ac3bed89760b449485f28b18c3d4a58483c558d991bbfe5a74108",
+    "https://deno.land/x/optic@1.3.5/utils/asString.ts": "7e79a4b7318a8754b6088b5ac3e1b8be1936f7d12d133f7292f9295815e8312b",
+    "https://deno.land/x/optic@1.3.5/utils/numberFormatter.ts": "4ea1da25f8d0a1bb7825fd9ff65050f050147ba7e3311ea311947c5293d9897b",
+    "https://deno.land/x/optic@1.3.5/utils/stringify.ts": "330c1fe33fc9265d2e90f7877b518d0956551ad3b7b8130af4adb208c1532a67"
+  }
+}

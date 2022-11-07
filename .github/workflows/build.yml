@@ -1,0 +1,38 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/install-action
+      - name: Check lint
+        run: vr lint
+      - name: Check format
+        run: vr format:check
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install project prerequisite
+        uses: ./.github/actions/install-action
+      - name: Run tests
+        run: vr cover:lcov
+      - name: Upload lcov coverage report file to Codecov
+        uses: codecov/codecov-action@v1.0.10
+        with:
+          file: ${{ github.workspace }}/dist/coverage/lcov.info

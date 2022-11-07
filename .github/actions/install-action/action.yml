@@ -1,0 +1,23 @@
+name: install
+description: Install specific versions of NodeJS and NPM
+
+inputs:
+  deno-version:
+    description: Deno version
+    default: v1.x
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+    - name: Install Deno version ${{ inputs.deno-version }}
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: ${{ inputs.deno-version }}
+    - name: Install Velociraptor
+      uses: jurassiscripts/setup-velociraptor@v2
+      with:
+        checkout: false
+    - name: GitHub Action for npx
+      uses: mikeal/npx@1.0.0
