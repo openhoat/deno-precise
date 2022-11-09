@@ -1,6 +1,6 @@
 [![deno module](https://shield.deno.dev/x/precise)](https://deno.land/x/precise)
 [![build](https://github.com/openhoat/deno-precise/actions/workflows/build.yml/badge.svg)](https://github.com/openhoat/deno-precise/actions/workflows/build.yml)
-[![codecov](https://codecov.io/openhoat/openhoat/deno-precise/branch/main/graph/badge.svg?token=VFJ63YUYY0)](https://app.codecov.io/openhoat/openhoat/deno-precise)
+[![codecov](https://codecov.io/gh/openhoat/deno-precise/branch/main/graph/badge.svg?token=VFJ63YUYY0)](https://app.codecov.io/openhoat/openhoat/deno-precise)
 [![vr scripts](https://badges.velociraptor.run/flat.svg)](https://velociraptor.run)
 
 # Precise
@@ -11,7 +11,7 @@ A clean and easy web server powered by Deno.
 
 ### Minimal example
 
-- Create `demo/sample1.ts`:
+- `demo/sample1.ts`:
 
   ```ts
   import WebServer from 'https://deno.land/x/precise/mod.ts'
@@ -19,9 +19,7 @@ A clean and easy web server powered by Deno.
   void new WebServer()
     .register({
       path: '/',
-      handler: function fooHandler() {
-        return Response.json({ foo: 'bar' })
-      },
+      handler: () => Response.json({ foo: 'bar' }),
     })
     .start()
   ```
@@ -75,7 +73,7 @@ I wanted a simple web server service, that starts, registers, and stops, and don
 
 ### Logger & signals handling
 
-- Create `demo/sample2.ts`:
+- `demo/sample2.ts`:
 
   ```ts
   import WebServer, { exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
@@ -136,7 +134,7 @@ I wanted a simple web server service, that starts, registers, and stops, and don
 
 Handle routes parameters:
 
-- Create `demo/sample3.ts`:
+- `demo/sample3.ts`:
 
   ```typescript
   import WebServer, { exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
@@ -200,6 +198,136 @@ Handle routes parameters:
   09 09:37:54:005 [Info    ] End processing connection
   09 09:37:54:006 [Info    ] Logging session complete.  Duration: 5337ms
   $ █
+  ```
+
+### Fallbacks
+
+In case of a not found resource or an error, defaults handler are applied.
+
+Feel free to use custom not found and error handlers.
+
+- `demo/sample4.ts`:
+
+  ```typescript
+  import WebServer from 'https://deno.land/x/precise/mod.ts'
+
+  const webServer = new WebServer()
+  webServer.register({
+    path: '/oops',
+    handler: () => {
+      throw new Error('oops')
+    },
+  })
+  webServer.setNotFoundHandler((req) =>
+    Response.json(
+      {
+        code: 'NOT_FOUND',
+        message: `Resource '${req.method} ${req.url}' not found.`,
+      },
+      { status: 404 },
+    ),
+  )
+  webServer.setErrorHandler((req: Request, err: Error, responseSent: boolean) => {
+    if (responseSent) {
+      return
+    }
+    return Response.json(
+      {
+        code: 'INTERNAL_SERVER',
+        message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+      },
+      { status: 500 },
+    )
+  })
+
+  void webServer.start()
+  ```
+
+- Request:
+
+  ```shell
+  $ http :8000/myverybadroute
+  HTTP/1.1 404 Not Found
+  content-encoding: gzip
+  content-length: 112
+  content-type: application/json
+  date: Wed, 09 Nov 2022 15:49:01 GMT
+  vary: Accept-Encoding
+
+  {
+    "code": "NOT_FOUND",
+    "message": "Resource 'GET http://localhost:8000/myverybadroute' not found."
+  }
+
+  $ http :8000/oops
+  HTTP/1.1 500 Internal Server Error
+  content-encoding: gzip
+  content-length: 123
+  content-type: application/json
+  date: Wed, 09 Nov 2022 15:50:11 GMT
+  vary: Accept-Encoding
+
+  {
+    "code": "INTERNAL_SERVER",
+    "message": "Error encountered in request 'GET http://localhost:8000/oops': oops."
+  }
+
+  $ █
+  ```
+
+  Server logs:
+
+  ```shell
+  09 09:37:53:001 [Info    ] Handle connection
+  09 09:37:53:001 [Info    ] Waiting for new request in connection#8
+  09 09:37:53:002 [Info    ] Waiting for new connection
+  09 09:37:53:002 [Info    ] Handle request
+  09 09:37:53:003 [Debug   ] Request pathname '/execute/stop' matches '/execute/:cmd': apply request handler 'handler'
+  09 09:37:53:003 [Info    ] Waiting for new request in connection#8
+  09 09:37:53:006 [Debug   ] No more request pending for connection#8
+  09 09:37:53:006 [Info    ] End processing request in connection#8
+  09 09:37:54:005 [Info    ] Stop server
+  09 09:37:54:005 [Warn    ] Listener has been closed
+  09 09:37:54:005 [Info    ] End processing connection
+  09 09:37:54:006 [Info    ] Logging session complete.  Duration: 5337ms
+  $ █
+  ```
+
+  Or in a simpler all-in-one form:
+
+  ```typescript
+  import WebServer from 'https://deno.land/x/precise/mod.ts'
+
+  void new WebServer({
+    errorHandler: (req: Request, err: Error, responseSent: boolean) => {
+      if (responseSent) {
+        return
+      }
+      return Response.json(
+        {
+          code: 'INTERNAL_SERVER',
+          message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+        },
+        { status: 500 },
+      )
+    },
+    notFoundHandler: (req: Request) =>
+      Response.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Resource '${req.method} ${req.url}' not found.`,
+        },
+        { status: 404 },
+      ),
+    requestHandlerSpecs: [
+      {
+        path: '/oops',
+        handler: () => {
+          throw new Error('oops')
+        },
+      },
+    ],
+  }).start()
   ```
 
 ## License

@@ -1,60 +1,42 @@
-import {
-  ConsoleStream,
-  EventEmitter,
-  getFreePort,
-  Level,
-  Logger,
-  longestLevelName,
-  TokenReplacer,
-} from '../../../deps.ts'
+import { EventEmitter, getFreePort, Logger } from '../../../deps.ts'
 import type {
   NamedRequestHandler,
   RequestHandler,
   RequestHandlerSpec,
 } from '../types/web/utils.d.ts'
-import type { WebServerable, WebServerDefaults, WebServerOptions } from '../types/web/server.d.ts'
+import { ErrorHandler, NotFoundHandler, RequestHandlerResult } from '../types/web/utils.d.ts'
+import type { WebServerable, WebServerOptions } from '../types/web/server.d.ts'
 import { StaticWebServerable } from '../types/web/server.d.ts'
 import { isDefinedObject, staticImplements, toNumber } from '../helper.ts'
-import {
-  defaultNotFoundRequestHandler,
-  hostnameForDisplay,
-  HttpMethods,
-  isRequestHandlerResultPromise,
-  toNamedRequestHandler,
-} from './utils.ts'
+import defaults from './defaults.ts'
+import { hostnameForDisplay, HttpMethods, isRequestHandlerResultPromise } from './utils.ts'
 
 @staticImplements<StaticWebServerable>()
-class WebServer extends EventEmitter {
-  static readonly defaults: WebServerDefaults = Object.freeze({
-    buildLogger: () =>
-      new Logger()
-        .withMinLogLevel(Level.Debug)
-        .addStream(
-          new ConsoleStream().withFormat(
-            new TokenReplacer()
-              .withFormat('{dateTime} [{level}] {msg}')
-              .withDateTimeFormat('ss:SSS')
-              .withLevelPadding(longestLevelName())
-              .withColor(),
-          ),
-        ),
-    port: 8000,
-    serverRequestHandlers: [toNamedRequestHandler(defaultNotFoundRequestHandler)],
-  })
-
+class WebServer extends EventEmitter implements WebServerable {
   readonly #options?: WebServerOptions
   readonly #requestHandlers: NamedRequestHandler[] = []
   #server?: Deno.Listener
-  #serverRequestHandlers: NamedRequestHandler[]
+  #errorHandler: ErrorHandler = defaults.errorHandler
+  #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
   #bindedPort?: number
-  readonly logger: Logger
+  readonly logger: Readonly<Logger>
 
   constructor(options?: WebServerOptions) {
     super()
-    this.logger = options?.logger ?? WebServer.defaults.buildLogger()
+    this.logger = options?.logger ?? defaults.buildLogger()
     this.logger.info('Create API server')
     this.#options = options
-    this.#serverRequestHandlers = WebServer.defaults.serverRequestHandlers
+    if (options?.errorHandler) {
+      this.setErrorHandler(options.errorHandler)
+    }
+    if (options?.notFoundHandler) {
+      this.setNotFoundHandler(options.notFoundHandler)
+    }
+    if (options?.requestHandlerSpecs) {
+      options.requestHandlerSpecs.forEach((requestHandlerSpec) => {
+        this.register(requestHandlerSpec)
+      })
+    }
   }
 
   get port(): number | undefined {
@@ -89,6 +71,21 @@ class WebServer extends EventEmitter {
       })
   }
 
+  applyRequestHandler(
+    requestEvent: Deno.RequestEvent,
+    requestHandler: NamedRequestHandler,
+    responseSent: boolean,
+  ): Promise<boolean> {
+    const { request } = requestEvent
+    let result: RequestHandlerResult
+    try {
+      result = requestHandler.handler(request, responseSent)
+    } catch (err) {
+      result = this.#errorHandler(request, err, responseSent)
+    }
+    return this.handleResponse(requestEvent, requestHandler.name, result, responseSent)
+  }
+
   async handleConn(conn: Deno.Conn) {
     this.logger.info('Handle connection')
     const httpConn = Deno.serveHttp(conn)
@@ -105,23 +102,42 @@ class WebServer extends EventEmitter {
     })
   }
 
+  async handleResponse(
+    requestEvent: Deno.RequestEvent,
+    requestHandlerName: string,
+    requestHandlerResult: RequestHandlerResult,
+    responseSent: boolean,
+  ): Promise<boolean> {
+    const response = isRequestHandlerResultPromise(requestHandlerResult)
+      ? await requestHandlerResult
+      : requestHandlerResult
+    if (!response) {
+      return responseSent
+    }
+    if (responseSent) {
+      this.logger.warn(
+        `Error in request handler '${requestHandlerName}': response has already been sent`,
+      )
+      return responseSent
+    }
+    await requestEvent.respondWith(response)
+    return true
+  }
+
   async handleRequest(requestEvent: Deno.RequestEvent) {
     this.logger.info('Handle request')
-    const { request } = requestEvent
-    await this.#serverRequestHandlers.reduce(async (promise, { handler, name }) => {
+    const responseSent = await this.#requestHandlers.reduce(async (promise, requestHandler) => {
       const responseSent = await promise
-      const result = handler(request, responseSent)
-      const response = isRequestHandlerResultPromise(result) ? await result : result
-      if (!response) {
-        return responseSent
-      }
-      if (responseSent) {
-        this.logger.warn(`Error in request handler ${name}: response has already been sent`)
-        return responseSent
-      }
-      await requestEvent.respondWith(response)
-      return true
+      return this.applyRequestHandler(requestEvent, requestHandler, responseSent)
     }, Promise.resolve(false))
+    if (!responseSent) {
+      this.logger.debug('No response sent by routes: fallback to not found handler')
+      await this.applyRequestHandler(
+        requestEvent,
+        { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
+        false,
+      )
+    }
   }
 
   register(requestHandlerSpec: RequestHandlerSpec): WebServerable {
@@ -152,23 +168,26 @@ class WebServer extends EventEmitter {
     return this
   }
 
+  setErrorHandler(errorHandler: ErrorHandler) {
+    this.logger.debug(`Set error handler (name: ${errorHandler.name})`)
+    this.#errorHandler = errorHandler
+  }
+
+  setNotFoundHandler(notFoundHandler: NotFoundHandler) {
+    this.logger.debug(`Set not found handler (name: ${notFoundHandler.name})`)
+    this.#notFoundHandler = notFoundHandler
+  }
+
   async start() {
     this.logger.info('Start server')
     if (this.started) {
       throw new Error('Server is already started')
     }
     const port = await getFreePort(
-      this.#options?.port ?? toNumber(Deno.env.get('PORT')) ?? WebServer.defaults.port,
+      this.#options?.port ?? toNumber(Deno.env.get('PORT')) ?? defaults.port,
     )
     this.#server = Deno.listen({ hostname: this.#options?.hostname, port })
     this.#bindedPort = port
-    this.#serverRequestHandlers = [
-      ...this.#requestHandlers,
-      toNamedRequestHandler(defaultNotFoundRequestHandler),
-    ]
-    for (const serverRequestHandler of this.#serverRequestHandlers) {
-      this.logger.info(`Apply server request handler '${serverRequestHandler.name}'`)
-    }
     this.accept()
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(this.#options?.hostname)}:${
@@ -187,7 +206,6 @@ class WebServer extends EventEmitter {
       this.emit('closing')
       server.close()
       this.#server = undefined
-      this.#serverRequestHandlers = WebServer.defaults.serverRequestHandlers
       this.once('closed', () => {
         resolve()
       })

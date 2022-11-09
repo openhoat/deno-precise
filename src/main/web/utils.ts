@@ -13,13 +13,6 @@ export enum HttpMethods {
   TRACE = 'TRACE',
 }
 
-export const defaultNotFoundRequestHandler: RequestHandler = (req: Request, responseSent) => {
-  if (responseSent) {
-    return
-  }
-  return new Response(`Resource ${req.url} not found.`, { status: 404 })
-}
-
 export const exitOnSignals = (
   webServer: WebServerable,
   signals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'],

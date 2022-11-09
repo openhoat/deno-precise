@@ -1,4 +1,4 @@
-import WebServer from 'precise/mod.ts'
+import WebServer from '/mod.ts'
 
 void new WebServer()
   .register({
