@@ -4,6 +4,6 @@ import { description } from 'https://deno.land/x/describe@v1.0.0/mod.ts'
 export {
   // std
   assertEquals,
-  //describe
+  // describe
   description,
 }
