@@ -61,13 +61,13 @@ A clean and easy web server powered by Deno.
   $ █
   ```
 
-# Why
+## Why
 
 This project has been created because of the lack of a stop method in Http Deno and the others third party modules.
 
 I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
 
-# Features
+## Features
 
 - [x] Basic service lifecycle
 - [x] Route matching
