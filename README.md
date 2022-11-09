@@ -1,7 +1,9 @@
 [![deno module](https://shield.deno.dev/x/precise)](https://deno.land/x/precise)
-[![build](https://github.com/openhoat/deno-precise/actions/workflows/build.yml/badge.svg)](https://github.com/openhoat/deno-precise/actions/workflows/build.yml)
+[![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/precise/mod.ts)
+[![CI](https://github.com/openhoat/deno-precise/actions/workflows/build.yml/badge.svg)](https://github.com/openhoat/deno-precise/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/openhoat/deno-precise/branch/main/graph/badge.svg?token=VFJ63YUYY0)](https://app.codecov.io/openhoat/openhoat/deno-precise)
 [![vr scripts](https://badges.velociraptor.run/flat.svg)](https://velociraptor.run)
+[![license](https://img.shields.io/github/license/openhoat/deno-precise)](https://github.com/openhoat/deno-precise/blob/master/LICENSE)
 
 # Precise
 
