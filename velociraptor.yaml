@@ -82,7 +82,6 @@ scripts:
     desc: Validate the project
     cmd:
       - vr clean
-      - pll:
-          - vr lint
-          - vr format:check
-          - vr cover
+      - vr lint
+      - vr format:check
+      - vr cover

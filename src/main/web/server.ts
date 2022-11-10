@@ -248,4 +248,4 @@ class WebServer extends EventEmitter implements WebServerable {
   }
 }
 
-export default WebServer
+export { WebServer }
