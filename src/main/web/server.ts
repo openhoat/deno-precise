@@ -9,9 +9,9 @@ import type {
   ResolvedRequestHandlerResult,
 } from '../types/web/utils.d.ts'
 import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
-import { asPromise, isDefinedObject, staticImplements, toNumber } from '../helper.ts'
+import { asPromise, isDefinedObject, staticImplements, toNumber, toResponse } from '../helper.ts'
 import defaults from './defaults.ts'
-import { hostnameForDisplay, HttpMethodSpecs, toResponse } from './utils.ts'
+import { hostnameForDisplay, HttpMethodSpecs } from './utils.ts'
 
 @staticImplements<StaticWebServerable>()
 class WebServer extends EventEmitter implements WebServerable {
