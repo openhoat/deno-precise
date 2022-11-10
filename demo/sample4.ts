@@ -1,4 +1,4 @@
-import WebServer from '../mod.ts'
+import { WebServer } from '../mod.ts'
 
 const webServer = new WebServer()
 webServer.setErrorHandler((req: Request, err: Error, responseSent: boolean) => {

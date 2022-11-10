@@ -1,4 +1,4 @@
-import WebServer, { exitOnSignals } from '../mod.ts'
+import { WebServer, exitOnSignals } from '../mod.ts'
 
 const webServer = new WebServer()
 webServer.register({

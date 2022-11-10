@@ -16,7 +16,7 @@ A clean and easy web server powered by Deno.
 [`demo/sample1.ts`](demo/sample1.ts):
 
 ```typescript
-import WebServer from 'https://deno.land/x/precise/mod.ts'
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 void new WebServer()
   .register({
@@ -110,7 +110,7 @@ This project was created with some strong principles in mind, which can be mainl
 [`demo/sample2.ts`](demo/sample2.ts):
 
 ```typescript
-import WebServer, { exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import { WebServer, exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 webServer.register({
@@ -169,7 +169,7 @@ Handle routes parameters:
 [`demo/sample3.ts`](demo/sample3.ts):
 
 ```typescript
-import WebServer, { exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import { WebServer, exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 const { logger } = webServer
@@ -241,7 +241,7 @@ Feel free to use custom not found and error handlers.
 [`demo/sample4.ts`](demo/sample4.ts):
 
 ```typescript
-import WebServer from 'https://deno.land/x/precise/mod.ts'
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 webServer.setErrorHandler((req: Request, err: Error, responseSent: boolean) => {
@@ -310,7 +310,7 @@ $ █
 Or in a simpler all-in-one form, as in [`demo/sample5.ts`](demo/sample5.ts):
 
 ```typescript
-import WebServer from 'https://deno.land/x/precise/mod.ts'
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 void new WebServer({
   errorHandler: (req: Request, err: Error, responseSent: boolean) => {
@@ -361,7 +361,7 @@ To register a middleware handling all routes, simply omit the `path`.
 [`demo/sample6.ts`](demo/sample6.ts):
 
 ```typescript
-import WebServer from '../mod.ts'
+import { WebServer } from '../mod.ts'
 
 void new WebServer({
   handlers: [

@@ -1,6 +1,6 @@
 import { Level, Logger } from '../../../deps.ts'
 import { assertEquals } from '../../../dev_deps.ts'
-import WebServer from '../../../mod.ts'
+import { WebServer } from '../../../mod.ts'
 import { description } from '../utils.ts'
 
 Deno.test('API server e2e tests', async (t) => {
