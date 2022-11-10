@@ -11,7 +11,72 @@ A clean and easy web server powered by Deno.
 
 ## Getting started
 
-### Minimal example
+### The stupid example
+
+Let's start a totally useless web server!
+
+[`demo/sample0.ts`](demo/sample0.ts):
+
+```typescript
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
+
+void new WebServer().start()
+```
+
+> - No config / middleware / handler registered
+> - The server will just apply the 'not found' fallback
+
+Run the server:
+
+```shell
+$ deno run demo/sample0.ts
+34:513 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
+34:514 [Info    ] Create web server
+34:514 [Info    ] Start server
+34:514 [Info    ] Accept connection
+34:514 [Info    ] Waiting for new connection
+34:515 [Info    ] Web server running. Access it at: http://localhost:8000/
+```
+
+Request with a browser:
+
+![404 default HTML page](assets/img/404-screenshot.png)
+
+Request with a text plain compliant User Agent:
+
+```shell
+$ http :8000/badroute "Accept:text/plain"
+HTTP/1.1 404 Not Found
+content-encoding: gzip
+content-length: 79
+content-type: text/plain;charset=UTF-8
+date: Thu, 10 Nov 2022 18:29:47 GMT
+vary: Accept-Encoding
+
+Resource 'GET http://localhost:8000/badroute' not found.
+
+$ █
+```
+
+Request with a JSON compliant User Agent:
+
+```shell
+✗ http :8000/badroute "Accept:application/json"
+HTTP/1.1 404 Not Found
+content-encoding: gzip
+content-length: 91
+content-type: application/json
+date: Thu, 10 Nov 2022 18:30:09 GMT
+vary: Accept-Encoding
+
+{
+    "error": "Resource 'GET http://localhost:8000/badroute' not found."
+}
+
+$ █
+```
+
+### The minimal example
 
 [`demo/sample1.ts`](demo/sample1.ts):
 

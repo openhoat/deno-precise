@@ -52,6 +52,10 @@ scripts:
   'format:check':
     cmd: npx prettier --check .
     desc: Format the project sources
+  'format:check:watch':
+    cmd: npx prettier --check .
+    desc: Format the project sources
+    watch: true
   'format:fix':
     cmd: npx prettier --write .
     desc: Format the project sources
@@ -63,6 +67,10 @@ scripts:
   lint:
     cmd: deno lint
     desc: Lint the project sources
+  'lint:watch':
+    cmd: deno lint
+    desc: Lint the project sources
+    watch: true
   test:
     desc: Run the tests
     cmd: deno test ./src/test
@@ -85,3 +93,11 @@ scripts:
       - vr lint
       - vr format:check
       - vr cover
+  'validate:watch':
+    desc: Validate the project in watch mode
+    cmd:
+      - vr clean
+      - pll:
+          - vr lint:watch
+          - vr format:check:watch
+          - vr test:watch
