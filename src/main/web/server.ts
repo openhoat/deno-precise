@@ -1,20 +1,21 @@
 import { EventEmitter, getFreePort, Logger } from '../../../deps.ts'
 import type {
-  NamedRequestHandler,
+  ErrorHandler,
+  NamedRouteHandler,
+  NotFoundHandler,
   RequestHandler,
+  RequestHandlerResult,
   RequestHandlerSpec,
 } from '../types/web/utils.d.ts'
-import { ErrorHandler, NotFoundHandler, RequestHandlerResult } from '../types/web/utils.d.ts'
-import type { WebServerable, WebServerOptions } from '../types/web/server.d.ts'
-import { StaticWebServerable } from '../types/web/server.d.ts'
+import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
 import { isDefinedObject, staticImplements, toNumber } from '../helper.ts'
 import defaults from './defaults.ts'
-import { hostnameForDisplay, HttpMethods, isRequestHandlerResultPromise } from './utils.ts'
+import { hostnameForDisplay, HttpMethodSpecs, isRequestHandlerResultPromise } from './utils.ts'
 
 @staticImplements<StaticWebServerable>()
 class WebServer extends EventEmitter implements WebServerable {
   readonly #options?: WebServerOptions
-  readonly #requestHandlers: NamedRequestHandler[] = []
+  readonly #routeHandlers: NamedRouteHandler[] = []
   #server?: Deno.Listener
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
@@ -24,7 +25,7 @@ class WebServer extends EventEmitter implements WebServerable {
   constructor(options?: WebServerOptions) {
     super()
     this.logger = options?.logger ?? defaults.buildLogger()
-    this.logger.info('Create API server')
+    this.logger.info('Create web server')
     this.#options = options
     if (options?.errorHandler) {
       this.setErrorHandler(options.errorHandler)
@@ -32,9 +33,9 @@ class WebServer extends EventEmitter implements WebServerable {
     if (options?.notFoundHandler) {
       this.setNotFoundHandler(options.notFoundHandler)
     }
-    if (options?.requestHandlerSpecs) {
-      options.requestHandlerSpecs.forEach((requestHandlerSpec) => {
-        this.register(requestHandlerSpec)
+    if (options?.handlers) {
+      options.handlers.forEach((handler) => {
+        this.register(handler)
       })
     }
   }
@@ -73,7 +74,7 @@ class WebServer extends EventEmitter implements WebServerable {
 
   applyRequestHandler(
     requestEvent: Deno.RequestEvent,
-    requestHandler: NamedRequestHandler,
+    requestHandler: NamedRouteHandler,
     responseSent: boolean,
   ): Promise<boolean> {
     const { request } = requestEvent
@@ -120,13 +121,15 @@ class WebServer extends EventEmitter implements WebServerable {
       )
       return responseSent
     }
-    await requestEvent.respondWith(response)
+    await requestEvent.respondWith(
+      response instanceof Response ? response : Response.json(response),
+    )
     return true
   }
 
   async handleRequest(requestEvent: Deno.RequestEvent) {
     this.logger.info('Handle request')
-    const responseSent = await this.#requestHandlers.reduce(async (promise, requestHandler) => {
+    const responseSent = await this.#routeHandlers.reduce(async (promise, requestHandler) => {
       const responseSent = await promise
       return this.applyRequestHandler(requestEvent, requestHandler, responseSent)
     }, Promise.resolve(false))
@@ -143,28 +146,37 @@ class WebServer extends EventEmitter implements WebServerable {
   register(requestHandlerSpec: RequestHandlerSpec): WebServerable {
     const {
       handler,
-      method = HttpMethods.GET,
+      method,
       name = requestHandlerSpec.handler.name,
       path: pathname,
     } = requestHandlerSpec
-    this.logger.info(`Register '${name}' with route ${method} ${pathname}`)
-    const urlPattern = new URLPattern({ pathname })
+    const urlPattern = pathname ? new URLPattern({ pathname }) : undefined
+    const methodToMatch = urlPattern ? method || HttpMethodSpecs.GET : HttpMethodSpecs.ALL
+    this.logger.info(`Register '${name}' on route '${methodToMatch} ${pathname || '*'}'`)
     const routeHandler: RequestHandler = (req, responseSent) => {
       const { pathname: requestPathname } = new URL(req.url)
-      const match = req.method === method && urlPattern.exec({ pathname: requestPathname })
-      if (!match) {
+      const urlMatch = urlPattern ? urlPattern.exec({ pathname: requestPathname }) : true
+      const methodMatch = methodToMatch === HttpMethodSpecs.ALL || req.method === methodToMatch
+      const requestMatch = methodMatch && urlMatch
+      if (!requestMatch) {
         this.logger.debug(
-          `Request pathname '${requestPathname}' does not match '${pathname}': ignore request handler '${name}'`,
+          `Request '${req.method} ${requestPathname}' does not match route '${methodToMatch} ${
+            pathname || '*'
+          }': ignore handler '${name}'`,
         )
         return
       }
-      req.params = match.pathname.groups
+      if (urlMatch !== true && urlMatch.pathname.groups) {
+        req.params = urlMatch.pathname.groups
+      }
       this.logger.debug(
-        `Request pathname '${requestPathname}' matches '${pathname}': apply request handler '${name}'`,
+        `Request '${req.method} ${requestPathname}' matches route '${methodToMatch} ${
+          pathname || '*'
+        }': apply handler '${name}'`,
       )
-      return handler(req, responseSent)
+      return handler.call(this, req, responseSent)
     }
-    this.#requestHandlers.push({ handler: routeHandler, name })
+    this.#routeHandlers.push({ handler: routeHandler, name })
     return this
   }
 

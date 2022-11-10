@@ -1,6 +1,6 @@
-import { assertEquals, description } from '/dev_deps.ts'
-import { toNumber } from '/main/helper.ts'
-import { eachAsync } from '/test/utils.ts'
+import { assertEquals, description } from '../../../dev_deps.ts'
+import { toNumber } from '../../main/helper.ts'
+import { eachAsync } from '../utils.ts'
 
 Deno.test('helper integration tests', async (t) => {
   const testCases = [

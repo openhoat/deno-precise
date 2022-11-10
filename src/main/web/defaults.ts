@@ -1,8 +1,5 @@
 import type { WebServerDefaults } from '../types/web/defaults.d.ts'
-import { Logger } from 'optic/logger/logger.ts'
-import { Level, longestLevelName } from 'optic/logger/levels.ts'
-import { ConsoleStream } from 'optic/streams/consoleStream.ts'
-import { TokenReplacer } from 'optic/formatters/tokenReplacer.ts'
+import { ConsoleStream, Level, Logger, longestLevelName, TokenReplacer } from '../../../deps.ts'
 
 const defaults: Readonly<WebServerDefaults> = Object.freeze({
   buildLogger: () =>

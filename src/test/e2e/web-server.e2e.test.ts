@@ -1,6 +1,6 @@
-import { Level, Logger } from '/deps.ts'
-import { assertEquals, description } from '/dev_deps.ts'
-import WebServer from '/main/web/server.ts'
+import { Level, Logger } from '../../../deps.ts'
+import { assertEquals, description } from '../../../dev_deps.ts'
+import WebServer from '../../main/web/server.ts'
 
 Deno.test('API server e2e tests', async (t) => {
   const logger = new Logger('test').withMinLogLevel(Level.Critical)

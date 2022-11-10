@@ -1,4 +1,4 @@
-import WebServer, { exitOnSignals } from '/mod.ts'
+import WebServer, { exitOnSignals } from '../mod.ts'
 
 const webServer = new WebServer()
 const { logger } = webServer
@@ -17,7 +17,7 @@ webServer.register({
       }, 1000)
       return new Response(undefined, { status: 202 })
     }
-    return Response.json({ foo: 'bar' })
+    return { foo: 'bar' }
   },
 })
 

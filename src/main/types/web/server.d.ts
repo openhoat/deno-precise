@@ -1,7 +1,7 @@
 import type { EventEmitter, Logger } from '../../../../deps.ts'
 import type {
   ErrorHandler,
-  NamedRequestHandler,
+  NamedRouteHandler,
   NotFoundHandler,
   RequestHandlerResult,
   RequestHandlerSpec,
@@ -9,11 +9,11 @@ import type {
 
 export type WebServerOptions = Partial<{
   errorHandler: ErrorHandler
+  handlers: RequestHandlerSpec[]
   hostname: string
   notFoundHandler: NotFoundHandler
   logger: Logger
   port: number
-  requestHandlerSpecs: RequestHandlerSpec[]
 }>
 
 export interface StaticWebServerable {
@@ -29,7 +29,7 @@ export interface WebServerable extends EventEmitter {
 
   applyRequestHandler(
     requestEvent: Deno.RequestEvent,
-    requestHandler: NamedRequestHandler,
+    requestHandler: NamedRouteHandler,
     responseSent: boolean,
   ): Promise<boolean>
 

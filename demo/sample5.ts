@@ -1,4 +1,4 @@
-import WebServer from '/mod.ts'
+import WebServer from '../mod.ts'
 
 void new WebServer({
   errorHandler: (req: Request, err: Error, responseSent: boolean) => {
@@ -21,7 +21,7 @@ void new WebServer({
       },
       { status: 404 },
     ),
-  requestHandlerSpecs: [
+  handlers: [
     {
       path: '/oops',
       handler: () => {

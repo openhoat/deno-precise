@@ -1,5 +1,4 @@
-import type { RequestHandler, RequestHandlerResult } from '../types/web/utils.d.ts'
-import { WebServerable } from '../types/web/server.d.ts'
+import type { RequestHandlerResult } from '../types/web/utils.d.ts'
 
 export enum HttpMethods {
   DELETE = 'DELETE',
@@ -13,29 +12,17 @@ export enum HttpMethods {
   TRACE = 'TRACE',
 }
 
-export const exitOnSignals = (
-  webServer: WebServerable,
-  signals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'],
-) => {
-  const { logger } = webServer
-  const onceSignal = (signal: Deno.Signal, handler: (signal: Deno.Signal) => void) => {
-    const signalHandler = () => {
-      Deno.removeSignalListener(signal, signalHandler)
-      handler(signal)
-    }
-    Deno.addSignalListener(signal, signalHandler)
-  }
-  const terminateSignalHandler = async (signal: Deno.Signal) => {
-    logger.warn(`Received signal ${signal}`)
-    await webServer.stop()
-  }
-  signals.forEach((signal) => {
-    logger.debug(`Handling signal ${signal}`)
-    onceSignal(signal, terminateSignalHandler)
-  })
-  if (signals.length) {
-    logger.info(`Type 'kill -s ${signals[0]} ${Deno.pid}' to stop`)
-  }
+export enum HttpMethodSpecs {
+  DELETE = 'DELETE',
+  GET = 'GET',
+  HEAD = 'HEAD',
+  OPTIONS = 'OPTIONS',
+  PATCH = 'PATCH',
+  POST = 'POST',
+  PURGE = 'PURGE',
+  PUT = 'PUT',
+  TRACE = 'TRACE',
+  ALL = 'ALL',
 }
 
 export const hostnameForDisplay = (hostname?: string): string => {
@@ -49,8 +36,4 @@ export const isRequestHandlerResultPromise = (
   result: RequestHandlerResult,
 ): result is Promise<Response | void> => {
   return typeof result !== 'undefined' && typeof (result as Promise<void>).then === 'function'
-}
-
-export const toNamedRequestHandler = (requestHandler: RequestHandler) => {
-  return { handler: requestHandler, name: requestHandler.name }
 }
