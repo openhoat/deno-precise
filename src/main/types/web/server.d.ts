@@ -1,11 +1,5 @@
 import type { EventEmitter, Logger } from '../../../../deps.ts'
-import type {
-  ErrorHandler,
-  NamedRouteHandler,
-  NotFoundHandler,
-  RequestHandlerResult,
-  RequestHandlerSpec,
-} from './utils.d.ts'
+import type { ErrorHandler, NotFoundHandler, RequestHandlerSpec } from './utils.d.ts'
 
 export type WebServerOptions = Partial<{
   errorHandler: ErrorHandler
@@ -25,25 +19,6 @@ export interface WebServerable extends EventEmitter {
   readonly port: number | undefined
   readonly started: boolean
 
-  accept(): void
-
-  applyRequestHandler(
-    requestEvent: Deno.RequestEvent,
-    requestHandler: NamedRouteHandler,
-    responseSent: boolean,
-  ): Promise<boolean>
-
-  handleConn(conn: Deno.Conn): Promise<void>
-
-  handleRequest(requestEvent: Deno.RequestEvent): Promise<void>
-
-  handleResponse(
-    requestEvent: Deno.RequestEvent,
-    requestHandlerName: string,
-    requestHandlerResult: RequestHandlerResult,
-    responseSent: boolean,
-  ): Promise<boolean>
-
   register(options: RequestHandlerSpec): WebServerable
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
@@ -51,6 +26,4 @@ export interface WebServerable extends EventEmitter {
   start(): Promise<void>
 
   stop(): Promise<void>
-
-  waitFor(name: string, cb: (server: Deno.Listener) => Promise<void | boolean>): Promise<void>
 }

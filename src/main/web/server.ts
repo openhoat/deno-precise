@@ -49,12 +49,12 @@ class WebServer extends EventEmitter implements WebServerable {
     return isDefinedObject(this.#server)
   }
 
-  accept() {
+  #accept() {
     this.logger.info('Accept connection')
-    this.waitFor('connection', async (server) => {
+    this.#waitFor('connection', async (server) => {
       try {
         const conn = await server.accept()
-        this.handleConn(conn).catch((err) => {
+        this.#handleConn(conn).catch((err) => {
           this.emit('error', err)
         })
       } catch (err) {
@@ -73,7 +73,7 @@ class WebServer extends EventEmitter implements WebServerable {
       })
   }
 
-  applyRequestHandler(
+  #applyRequestHandler(
     requestEvent: Deno.RequestEvent,
     requestHandler: NamedRouteHandler,
     responseSent: boolean,
@@ -85,26 +85,26 @@ class WebServer extends EventEmitter implements WebServerable {
     } catch (err) {
       result = this.#errorHandler(request, err, responseSent)
     }
-    return this.handleResponse(requestEvent, requestHandler.name, result, responseSent)
+    return this.#handleResponse(requestEvent, requestHandler.name, result, responseSent)
   }
 
-  async handleConn(conn: Deno.Conn) {
+  async #handleConn(conn: Deno.Conn) {
     this.logger.info('Handle connection')
     const httpConn = Deno.serveHttp(conn)
     this.once('closing', () => {
       httpConn.close()
     })
-    await this.waitFor(`request in connection#${conn.rid}`, async () => {
+    await this.#waitFor(`request in connection#${conn.rid}`, async () => {
       const requestEvent = await httpConn.nextRequest()
       if (!requestEvent) {
         this.logger.debug(`No more request pending for connection#${conn.rid}`)
         return false
       }
-      await this.handleRequest(requestEvent)
+      await this.#handleRequest(requestEvent)
     })
   }
 
-  async handleResponse(
+  async #handleResponse(
     requestEvent: Deno.RequestEvent,
     requestHandlerName: string,
     requestHandlerResult: RequestHandlerResult,
@@ -127,20 +127,43 @@ class WebServer extends EventEmitter implements WebServerable {
     return true
   }
 
-  async handleRequest(requestEvent: Deno.RequestEvent) {
+  async #handleRequest(requestEvent: Deno.RequestEvent) {
     this.logger.info('Handle request')
     const responseSent = await this.#routeHandlers.reduce(async (promise, requestHandler) => {
       const responseSent = await promise
-      return this.applyRequestHandler(requestEvent, requestHandler, responseSent)
+      return this.#applyRequestHandler(requestEvent, requestHandler, responseSent)
     }, Promise.resolve(false))
     if (!responseSent) {
       this.logger.debug('No response sent by routes: fallback to not found handler')
-      await this.applyRequestHandler(
+      await this.#applyRequestHandler(
         requestEvent,
         { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
         false,
       )
     }
+  }
+
+  async #waitFor(
+    name: string,
+    cb: (server: Deno.Listener) => Promise<void | boolean>,
+  ): Promise<void> {
+    const server = this.#server
+    while (true) {
+      if (!server) {
+        break
+      }
+      this.logger.info(`Waiting for new ${name}`)
+      try {
+        const result = await cb(server)
+        if (result === false) {
+          break
+        }
+      } catch (err) {
+        this.emit('error', err)
+        break
+      }
+    }
+    this.logger.info(`End processing ${name}`)
   }
 
   register(requestHandlerSpec: RequestHandlerSpec): WebServerable {
@@ -200,7 +223,7 @@ class WebServer extends EventEmitter implements WebServerable {
     )
     this.#server = Deno.listen({ hostname: this.#options?.hostname, port })
     this.#bindedPort = port
-    this.accept()
+    this.#accept()
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(this.#options?.hostname)}:${
         this.#bindedPort
@@ -222,29 +245,6 @@ class WebServer extends EventEmitter implements WebServerable {
         resolve()
       })
     })
-  }
-
-  async waitFor(
-    name: string,
-    cb: (server: Deno.Listener) => Promise<void | boolean>,
-  ): Promise<void> {
-    const server = this.#server
-    while (true) {
-      if (!server) {
-        break
-      }
-      this.logger.info(`Waiting for new ${name}`)
-      try {
-        const result = await cb(server)
-        if (result === false) {
-          break
-        }
-      } catch (err) {
-        this.emit('error', err)
-        break
-      }
-    }
-    this.logger.info(`End processing ${name}`)
   }
 }
 
