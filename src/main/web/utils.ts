@@ -1,5 +1,3 @@
-import type { RequestHandlerResult } from '../types/web/utils.d.ts'
-
 export enum HttpMethods {
   DELETE = 'DELETE',
   GET = 'GET',
@@ -32,8 +30,25 @@ export const hostnameForDisplay = (hostname?: string): string => {
   return !hostname || hostname === '0.0.0.0' ? 'localhost' : hostname
 }
 
-export const isRequestHandlerResultPromise = (
-  result: RequestHandlerResult,
-): result is Promise<Response | void> => {
-  return typeof result !== 'undefined' && typeof (result as Promise<void>).then === 'function'
+export const isBodyInit = (value: unknown): value is BodyInit => {
+  return (
+    typeof value === 'string' ||
+    value instanceof Blob ||
+    value instanceof ArrayBuffer ||
+    value instanceof FormData ||
+    value instanceof URLSearchParams ||
+    value instanceof ReadableStream
+  )
+}
+
+export const toResponse = (value?: Response | BodyInit | unknown): Response | undefined => {
+  if (value instanceof Response) {
+    return value
+  }
+  if (isBodyInit(value)) {
+    return new Response(value)
+  }
+  if (typeof value === 'object') {
+    return Response.json(value)
+  }
 }

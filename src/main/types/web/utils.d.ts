@@ -17,7 +17,11 @@ export interface RequestWithRouteParams extends Request {
   params?: Record<string, string>
 }
 
-export type RequestHandlerResult = Response | unknown | void | Promise<Response | unknown | void>
+export type ResolvedRequestHandlerResult = Response | BodyInit | unknown | void
+
+export type RequestHandlerResult =
+  | ResolvedRequestHandlerResult
+  | Promise<ResolvedRequestHandlerResult>
 
 export type ErrorHandler = (
   this: WebServerable,

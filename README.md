@@ -26,6 +26,14 @@ void new WebServer()
   .start()
 ```
 
+> A request handler can return either:
+>
+> - nothing: the server will not send any response.
+> - a [JSON literal object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer): the server will send a JSON content HTTP response.
+> - a [BodyInit](https://deno.land/api@v1.27.2?s=BodyInit): the server will send a wrapped response on top of the provided body.
+> - a [Response](https://deno.com/deploy/docs/runtime-response): the server will send the given response.
+> - [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) of the aboves: the server will resolve the promise and apply the aboves strategies.
+
 Run the server:
 
 ```shell
@@ -77,7 +85,8 @@ Server logs:
 
 This project has been created because of the lack of a stop method in Http Deno and the others third party modules.
 
-I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
+I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async
+iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
 
 ## Features
 
