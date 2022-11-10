@@ -29,10 +29,13 @@ void new WebServer()
 > A request handler can return either:
 >
 > - nothing: the server will not send any response.
-> - a [JSON literal object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer): the server will send a JSON content HTTP response.
-> - a [BodyInit](https://deno.land/api@v1.27.2?s=BodyInit): the server will send a wrapped response on top of the provided body.
+> - a [JSON literal object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
+>   the server will send a JSON content HTTP response.
+> - a [BodyInit](https://deno.land/api@v1.27.2?s=BodyInit): the server will send a wrapped response on top of the
+>   provided body.
 > - a [Response](https://deno.com/deploy/docs/runtime-response): the server will send the given response.
-> - [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) of the aboves: the server will resolve the promise and apply the aboves strategies.
+> - [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) of the aboves:
+>   the server will resolve the promise and apply the aboves strategies.
 
 Run the server:
 
@@ -87,6 +90,14 @@ This project has been created because of the lack of a stop method in Http Deno 
 
 I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async
 iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
+
+This project was created with some strong principles in mind, which can be mainly summarized by [DX](https://developerexperience.io/):
+
+- Quality
+- Testing
+- Clean and easy understandable API
+- Async / Promise compliant everywhere
+- Robust: all is done to be sure that in any situation the server will have a fair behaviour and will report enough logs
 
 ## Features
 
@@ -334,6 +345,16 @@ void new WebServer({
 ```
 
 ### Middlewares
+
+Route request handlers are part of a middlewares list enabled when the server is started.
+
+The server will pass the request to each registered middleware in the order of their registration, then fallback to the
+special 'not found' handler if no response was sent.
+
+In case of error in any handler, the server will pass the request to the special error handler.
+
+In the middlewares chain, each handler is executed, even if the response has already been sent ; it's the responsability
+of the handler to check it and return sooner if the response was already sent.
 
 To register a middleware handling all routes, simply omit the `path`.
 
