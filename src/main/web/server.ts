@@ -275,11 +275,13 @@ class WebServer extends EventEmitter implements WebServerable {
     if (this.started) {
       throw new Error('Server is already started')
     }
-    this.#prepareRouteHandlers()
     const port =
       toNumber(Deno.env.get('PORT')) ?? (await getFreePort(this.#options?.port ?? defaults.port))
-    this.#server = Deno.listen({ hostname: this.#options?.hostname, port })
+    const listenOptions = { hostname: this.#options?.hostname, port }
+    this.logger.debug(`Trying to bind: ${JSON.stringify(listenOptions)}`)
+    this.#server = Deno.listen(listenOptions)
     this.#bindedPort = port
+    this.#prepareRouteHandlers()
     this.#accept()
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(this.#options?.hostname)}:${
