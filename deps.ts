@@ -1,7 +1,8 @@
 import { join, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import type { ConnInfo, Handler, ServeInit } from 'https://deno.land/std@0.162.0/http/server.ts'
+import { Server } from 'https://deno.land/std@0.162.0/http/server.ts'
 import { Accepts } from 'https://deno.land/x/accepts@2.1.1/mod.ts'
 import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
-import EventEmitter from 'https://deno.land/x/events@v1.0.0/mod.ts'
 import { getFreePort } from 'https://deno.land/x/free_port@v1.2.0/mod.ts'
 import { TokenReplacer } from 'https://deno.land/x/optic@1.3.5/formatters/tokenReplacer.ts'
 import {
@@ -16,12 +17,15 @@ export {
   // std/path
   join,
   resolve,
+  // std/http/server
+  ConnInfo,
+  Handler,
+  Server,
+  ServeInit,
   // accepts
   Accepts,
   // camelcase
   camelCase,
-  // events
-  EventEmitter,
   // free_port
   getFreePort,
   // optic
