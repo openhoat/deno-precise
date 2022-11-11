@@ -1,6 +1,6 @@
 import type { WebServerable } from '../types/web/server.d.ts'
 
-const exitOnSignals = (
+const stopOnSignals = (
   webServer: WebServerable,
   signals: Deno.Signal[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'],
 ) => {
@@ -25,4 +25,4 @@ const exitOnSignals = (
   }
 }
 
-export { exitOnSignals }
+export { stopOnSignals }

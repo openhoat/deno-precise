@@ -1,4 +1,4 @@
-import { WebServer, exitOnSignals } from '../mod.ts'
+import { WebServer, stopOnSignals } from '../mod.ts'
 
 const webServer = new WebServer()
 const { logger } = webServer
@@ -28,4 +28,4 @@ try {
   Deno.exit(1)
 }
 
-exitOnSignals(webServer)
+stopOnSignals(webServer)

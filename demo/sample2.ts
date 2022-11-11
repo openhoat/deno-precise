@@ -1,4 +1,4 @@
-import { WebServer, exitOnSignals } from '../mod.ts'
+import { WebServer, stopOnSignals } from '../mod.ts'
 
 const webServer = new WebServer()
 webServer.register({
@@ -6,4 +6,4 @@ webServer.register({
   handler: () => ({ foo: 'bar' }),
 })
 await webServer.start()
-exitOnSignals(webServer)
+stopOnSignals(webServer)

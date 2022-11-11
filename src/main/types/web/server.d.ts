@@ -1,4 +1,5 @@
 import type { EventEmitter, Logger } from '../../../../deps.ts'
+import type { Routerable } from './router.d.ts'
 import type { ErrorHandler, NotFoundHandler, RequestHandlerSpec } from './utils.d.ts'
 
 export type WebServerOptions = Partial<{
@@ -19,7 +20,7 @@ export interface WebServerable extends EventEmitter {
   readonly port: number | undefined
   readonly started: boolean
 
-  register(options: RequestHandlerSpec): WebServerable
+  register(requestHandlerSpec: RequestHandlerSpec | Routerable): WebServerable
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
 
