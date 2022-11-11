@@ -156,7 +156,8 @@ This project has been created because of the lack of a stop method in Http Deno 
 I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async
 iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
 
-This project was created with some strong principles in mind, which can be mainly summarized by [DX](https://developerexperience.io/):
+This project was created with some strong principles in mind, which can be mainly summarized
+by [DX](https://developerexperience.io/):
 
 - Quality
 - Testing
@@ -166,11 +167,17 @@ This project was created with some strong principles in mind, which can be mainl
 
 ## Features
 
-- [x] Basic service lifecycle
-- [x] Route matching
-- [x] Route params
+- [x] [Basic service lifecycle](#why)
+- [x] [Route matching](#the-minimal-example)
+- [x] [Signal handling](#signals-handling)
+- [x] [Route params](#route-params)
+- [x] [Middlewares](#middlewares)
+- [x] [Routers](#routers)
+- [x] [Logging](#logging)
 
-### Logger & signals handling
+### Signals handling
+
+Use signals handling to gracefully shutdown the web server.
 
 [`demo/sample2.ts`](demo/sample2.ts):
 
@@ -426,7 +433,7 @@ To register a middleware handling all routes, simply omit the `path`.
 [`demo/sample6.ts`](demo/sample6.ts):
 
 ```typescript
-import { WebServer } from '../mod.ts'
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 void new WebServer({
   handlers: [
@@ -468,6 +475,91 @@ Server logs:
 ```
 
 > It's possible to add a `method` property to refine matching criteria.
+
+### Routers
+
+Use routers to better organize your routes with path prefixes.
+
+[`demo/sample7.ts`](demo/sample7.ts):
+
+```typescript
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
+import { apiRouter } from './api/api_router.ts'
+
+const webServer = new WebServer()
+webServer.register(apiRouter)
+void webServer.start()
+```
+
+[`demo/api/api_router.ts`](demo/api/api_router.ts):
+
+```typescript
+import { Router } from 'https://deno.land/x/precise/mod.ts'
+import { v1Router } from './v1/v1_router.ts'
+
+const apiRouter = new Router({ prefix: '/api' })
+apiRouter.register(v1Router)
+apiRouter.get('/health', () => ({ ok: true }))
+
+export { apiRouter }
+```
+
+[`demo/api/v1/v1_router.ts`](demo/api/v1/v1_router.ts):
+
+```typescript
+import { Router } from 'https://deno.land/x/precise/mod.ts'
+
+const v1Router = new Router({ prefix: '/v1' })
+v1Router.get('/foo', () => {
+  return { foo: 'bar' }
+})
+v1Router.delete('/hello', () => {
+  return { message: 'bye!' }
+})
+
+export { v1Router }
+```
+
+### Logging
+
+The web server comes with an embedded default logger based on [optic](https://deno.land/x/optic).
+
+If you need to customize logging, just pass your custom logger into the web server options.
+
+[`demo/sample8.ts`](demo/sample8.ts):
+
+```typescript
+import { WebServer } from 'https://deno.land/x/precise/mod.ts'
+import logger from './logger.ts'
+
+const webServer = new WebServer({ logger })
+void webServer.start()
+```
+
+[`demo/logger.ts`](demo/logger.ts):
+
+```typescript
+import { TokenReplacer } from 'https://deno.land/x/optic/formatters/tokenReplacer.ts'
+import { longestLevelName, nameToLevel } from 'https://deno.land/x/optic/logger/levels.ts'
+import { Logger } from 'https://deno.land/x/optic/logger/logger.ts'
+import { ConsoleStream } from 'https://deno.land/x/optic/streams/consoleStream.ts'
+
+const logLevel = nameToLevel(Deno.env.get('LOG_LEVEL') ?? 'Debug')
+const levelPadding = longestLevelName()
+const logger = new Logger()
+  .withMinLogLevel(logLevel)
+  .addStream(
+    new ConsoleStream().withFormat(
+      new TokenReplacer()
+        .withFormat('{dateTime} [{level}] {msg}')
+        .withDateTimeFormat('DD hh:mm:ss:SSS')
+        .withLevelPadding(levelPadding)
+        .withColor(),
+    ),
+  )
+
+export default logger
+```
 
 ## License
 
