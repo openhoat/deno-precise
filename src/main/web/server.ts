@@ -277,7 +277,7 @@ class WebServer extends EventEmitter implements WebServerable {
     }
     const port =
       toNumber(Deno.env.get('PORT')) ?? (await getFreePort(this.#options?.port ?? defaults.port))
-    const listenOptions = { hostname: this.#options?.hostname, port }
+    const listenOptions = { hostname: this.#options?.hostname ?? '0.0.0.0', port }
     this.logger.debug(`Trying to bind: ${JSON.stringify(listenOptions)}`)
     this.#server = Deno.listen(listenOptions)
     this.#bindedPort = port
