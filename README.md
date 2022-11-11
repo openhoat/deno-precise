@@ -20,7 +20,7 @@ Let's start a totally useless web server!
 ```typescript
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
-void new WebServer().start()
+await new WebServer().start()
 ```
 
 > - No config / middleware / handler registered
@@ -83,7 +83,7 @@ $ █
 ```typescript
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
-void new WebServer()
+await new WebServer()
   .register({
     path: '/',
     handler: () => ({ foo: 'bar' }),
@@ -182,15 +182,15 @@ Use signals handling to gracefully shutdown the web server.
 [`demo/sample2.ts`](demo/sample2.ts):
 
 ```typescript
-import { WebServer, exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import { WebServer, shutdownOnSignals } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
+shutdownOnSignals(webServer)
 webServer.register({
   path: '/',
   handler: () => ({ foo: 'bar' }),
 })
 await webServer.start()
-exitOnSignals(webServer)
 ```
 
 Run the server:
@@ -241,9 +241,10 @@ Handle routes parameters:
 [`demo/sample3.ts`](demo/sample3.ts):
 
 ```typescript
-import { WebServer, exitOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import { WebServer, shutdownOnSignals } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
+shutdownOnSignals(webServer)
 const { logger } = webServer
 webServer.register({
   method: 'POST',
@@ -270,8 +271,6 @@ try {
   logger.error(err)
   Deno.exit(1)
 }
-
-exitOnSignals(webServer)
 ```
 
 Request:
@@ -344,7 +343,7 @@ webServer.register({
   },
 })
 
-void webServer.start()
+await webServer.start()
 ```
 
 Request:
@@ -384,7 +383,7 @@ Or in a simpler all-in-one form, as in [`demo/sample5.ts`](demo/sample5.ts):
 ```typescript
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
-void new WebServer({
+await new WebServer({
   errorHandler: (req: Request, err: Error, responseSent: boolean) => {
     if (responseSent) {
       return
@@ -435,7 +434,7 @@ To register a middleware handling all routes, simply omit the `path`.
 ```typescript
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
-void new WebServer({
+await new WebServer({
   handlers: [
     {
       handler: function allRoutesHandler(req) {
@@ -488,7 +487,7 @@ import { apiRouter } from './api/api_router.ts'
 
 const webServer = new WebServer()
 webServer.register(apiRouter)
-void webServer.start()
+await webServer.start()
 ```
 
 [`demo/api/api_router.ts`](demo/api/api_router.ts):
@@ -533,7 +532,7 @@ import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 import logger from './logger.ts'
 
 const webServer = new WebServer({ logger })
-void webServer.start()
+await webServer.start()
 ```
 
 [`demo/logger.ts`](demo/logger.ts):

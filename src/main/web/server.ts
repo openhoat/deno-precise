@@ -93,64 +93,6 @@ class WebServer extends EventEmitter implements WebServerable {
     return this.#handleResponse(requestEvent, requestHandler.name, result, responseSent)
   }
 
-  async #handleConn(conn: Deno.Conn) {
-    this.logger.info('Handle connection')
-    const httpConn = Deno.serveHttp(conn)
-    this.once('closing', () => {
-      httpConn.close()
-    })
-    await this.#waitFor(`request in connection#${conn.rid}`, async () => {
-      const requestEvent = await httpConn.nextRequest()
-      if (!requestEvent) {
-        this.logger.debug(`No more request pending for connection#${conn.rid}`)
-        return false
-      }
-      await this.#handleRequest(requestEvent)
-    })
-  }
-
-  async #handleResponse(
-    requestEvent: Deno.RequestEvent,
-    requestHandlerName: string,
-    requestHandlerResult: RequestHandlerResult,
-    responseSent: boolean,
-  ): Promise<boolean> {
-    const resolvedResult: ResolvedRequestHandlerResult = await asPromise(requestHandlerResult)
-    if (!resolvedResult) {
-      return responseSent
-    }
-    if (responseSent) {
-      this.logger.warn(
-        `Error in request handler '${requestHandlerName}': response has already been sent`,
-      )
-      return responseSent
-    }
-    const response = toResponse(resolvedResult)
-    if (response) {
-      await requestEvent.respondWith(response)
-    }
-    return true
-  }
-
-  async #handleRequest(requestEvent: Deno.RequestEvent) {
-    this.logger.info('Handle request')
-    const routeHandlers = this.#routeHandlers
-    const responseSent =
-      routeHandlers?.length &&
-      (await routeHandlers.reduce(async (promise, requestHandler) => {
-        const responseSent = await promise
-        return this.#applyRequestHandler(requestEvent, requestHandler, responseSent)
-      }, Promise.resolve(false)))
-    if (!responseSent) {
-      this.logger.debug('No response sent by routes: fallback to not found handler')
-      await this.#applyRequestHandler(
-        requestEvent,
-        { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
-        false,
-      )
-    }
-  }
-
   #buildRouteHandler({
     handler,
     handlerName,
@@ -189,6 +131,81 @@ class WebServer extends EventEmitter implements WebServerable {
     }
   }
 
+  async #handleConn(conn: Deno.Conn) {
+    this.logger.info('Handle connection')
+    const httpConn = Deno.serveHttp(conn)
+    this.once('closing', () => {
+      httpConn.close()
+    })
+    await this.#waitFor(`request in connection#${conn.rid}`, async () => {
+      const requestEvent = await httpConn.nextRequest()
+      if (!requestEvent) {
+        this.logger.debug(`No more request pending for connection#${conn.rid}`)
+        return false
+      }
+      await this.#handleRequest(requestEvent)
+    })
+  }
+
+  async #handleRequest(requestEvent: Deno.RequestEvent) {
+    this.logger.info('Handle request')
+    const routeHandlers = this.#routeHandlers
+    const responseSent =
+      routeHandlers?.length &&
+      (await routeHandlers.reduce(async (promise, requestHandler) => {
+        const responseSent = await promise
+        return this.#applyRequestHandler(requestEvent, requestHandler, responseSent)
+      }, Promise.resolve(false)))
+    if (!responseSent) {
+      this.logger.debug('No response sent by routes: fallback to not found handler')
+      await this.#applyRequestHandler(
+        requestEvent,
+        { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
+        false,
+      )
+    }
+  }
+
+  async #handleResponse(
+    requestEvent: Deno.RequestEvent,
+    requestHandlerName: string,
+    requestHandlerResult: RequestHandlerResult,
+    responseSent: boolean,
+  ): Promise<boolean> {
+    const resolvedResult: ResolvedRequestHandlerResult = await asPromise(requestHandlerResult)
+    if (!resolvedResult) {
+      return responseSent
+    }
+    if (responseSent) {
+      this.logger.warn(
+        `Error in request handler '${requestHandlerName}': response has already been sent`,
+      )
+      return responseSent
+    }
+    const response = toResponse(resolvedResult)
+    if (response) {
+      await requestEvent.respondWith(response)
+    }
+    return true
+  }
+
+  #prepareRouteHandlers() {
+    this.#routers.forEach((router) => {
+      router.registerToServer(this)
+    })
+    this.#routeHandlers = this.#requestHandlerSpecs.map((requestHandlerSpec) =>
+      this.#toNamedRouteHandler(requestHandlerSpec),
+    )
+  }
+
+  #registerRequestHandler(requestHandlerSpec: RequestHandlerSpec) {
+    this.#requestHandlerSpecs.push(requestHandlerSpec)
+  }
+
+  #registerRouter(router: Routerable) {
+    this.#routers.push(router)
+  }
+
   #toNamedRouteHandler(requestHandlerSpec: RequestHandlerSpec): NamedRouteHandler {
     const {
       handler,
@@ -209,23 +226,6 @@ class WebServer extends EventEmitter implements WebServerable {
       urlPattern,
     })
     return { handler: routeHandler, name: handlerName }
-  }
-
-  #prepareRouteHandlers() {
-    this.#routers.forEach((router) => {
-      router.registerToServer(this)
-    })
-    this.#routeHandlers = this.#requestHandlerSpecs.map((requestHandlerSpec) => {
-      return this.#toNamedRouteHandler(requestHandlerSpec)
-    })
-  }
-
-  #registerRequestHandler(requestHandlerSpec: RequestHandlerSpec) {
-    this.#requestHandlerSpecs.push(requestHandlerSpec)
-  }
-
-  #registerRouter(router: Routerable) {
-    this.#routers.push(router)
   }
 
   async #waitFor(

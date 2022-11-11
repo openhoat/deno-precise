@@ -1,3 +1,3 @@
 import { WebServer } from '../mod.ts'
 
-void new WebServer().start()
+await new WebServer().start()

@@ -1,6 +1,7 @@
-import { WebServer, stopOnSignals } from '../mod.ts'
+import { WebServer, shutdownOnSignals } from '../mod.ts'
 
 const webServer = new WebServer()
+shutdownOnSignals(webServer)
 const { logger } = webServer
 webServer.register({
   method: 'POST',
@@ -27,5 +28,3 @@ try {
   logger.error(err)
   Deno.exit(1)
 }
-
-stopOnSignals(webServer)

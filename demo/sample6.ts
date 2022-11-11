@@ -1,6 +1,6 @@
 import { WebServer } from '../mod.ts'
 
-void new WebServer({
+await new WebServer({
   handlers: [
     {
       handler: function allRoutesHandler(req) {

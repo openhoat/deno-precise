@@ -29,4 +29,4 @@ webServer.register({
   },
 })
 
-void webServer.start()
+await webServer.start()

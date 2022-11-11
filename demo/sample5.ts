@@ -1,6 +1,6 @@
 import { WebServer } from '../mod.ts'
 
-void new WebServer({
+await new WebServer({
   errorHandler: (req: Request, err: Error, responseSent: boolean) => {
     if (responseSent) {
       return
