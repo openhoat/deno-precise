@@ -160,6 +160,17 @@ by [DX](https://developerexperience.io/):
 - Async / Promise compliant everywhere
 - Robust: all is done to be sure that in any situation the server will have a fair behaviour and will report enough logs
 
+## Deploy
+
+Precise supports [Deno deploy](https://deno.com/deploy) out-of-the-box.
+
+Live demo:
+
+- hello route: [precise.deno.dev/hello](https://precise.deno.dev/hello)
+- not found fallback: [precise.deno.dev/oops](https://precise.deno.dev/oops)
+
+Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
+
 ## Features
 
 - [x] [Basic service lifecycle](#why)
