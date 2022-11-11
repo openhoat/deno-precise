@@ -30,12 +30,14 @@ Run the server:
 
 ```shell
 $ deno run demo/sample0.ts
-34:513 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
-34:514 [Info    ] Create web server
-34:514 [Info    ] Start server
-34:514 [Info    ] Accept connection
-34:514 [Info    ] Waiting for new connection
-34:515 [Info    ] Web server running. Access it at: http://localhost:8000/
+17:259 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
+17:259 [Info    ] Create web server
+17:259 [Info    ] Start server
+✅ Granted env access to "PORT".
+✅ Granted net access to "0.0.0.0:8000".
+19:164 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
+19:164 [Debug   ] Successfuly binded: port=8000 hostname=0.0.0.0
+19:165 [Info    ] Web server running. Access it at: http://localhost:8000/
 ```
 
 Request with a browser:
@@ -106,16 +108,15 @@ Run the server:
 
 ```shell
 $ deno run demo/sample1.ts
-39:043 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
-39:043 [Info    ] Create web server
-39:044 [Info    ] Register 'handler' on route 'GET /'
-39:044 [Info    ] Start server
+52:554 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
+52:555 [Info    ] Create web server
+52:555 [Info    ] Start server
 ✅ Granted env access to "PORT".
 ✅ Granted net access to "0.0.0.0:8000".
-39:044 [Info    ] Accept connection
-39:044 [Info    ] Waiting for new connection
-39:044 [Info    ] Web server running. Access it at: http://localhost:8000/
-$ █
+54:220 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
+54:220 [Debug   ] Successfuly binded: port=8000 hostname=0.0.0.0
+54:221 [Info    ] Register 'handler' on route 'GET /'
+54:221 [Info    ] Web server running. Access it at: http://localhost:8000/
 ```
 
 Request:
@@ -139,14 +140,8 @@ Server logs:
 
 ```text
 …
-54:006 [Info    ] Handle connection
-54:006 [Info    ] Waiting for new request in connection#5
-54:006 [Info    ] Waiting for new connection
-54:007 [Info    ] Handle request
-54:007 [Debug   ] Request 'GET /' matches route 'GET /': apply handler 'handler'
-54:008 [Info    ] Waiting for new request in connection#5
-54:010 [Debug   ] No more request pending for connection#5
-54:010 [Info    ] End processing request in connection#5
+38:225 [Info    ] Handle request
+38:225 [Debug   ] Request 'GET /' matches route 'GET /': apply 'handler'
 ```
 
 ## Why
@@ -197,25 +192,25 @@ Run the server:
 
 ```shell
 $ deno run demo/sample2.ts
-17:393 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
-17:393 [Info    ] Create web server
-17:393 [Info    ] Register 'handler' on route 'GET /'
-17:393 [Info    ] Start server
+26:867 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
+26:867 [Info    ] Create web server
+26:867 [Debug   ] Handling signal SIGINT
+26:868 [Debug   ] Handling signal SIGTERM
+26:868 [Debug   ] Handling signal SIGQUIT
+26:868 [Info    ] Type 'kill -s SIGINT 52613' to stop
+26:868 [Info    ] Start server
 ✅ Granted env access to "PORT".
 ✅ Granted net access to "0.0.0.0:8000".
-19:941 [Info    ] Accept connection
-19:941 [Info    ] Waiting for new connection
-19:941 [Info    ] Web server running. Access it at: http://localhost:8000/
-19:942 [Debug   ] Handling signal SIGINT
-19:942 [Debug   ] Handling signal SIGTERM
-19:942 [Debug   ] Handling signal SIGQUIT
-19:942 [Info    ] Type 'kill -s SIGINT 16415' to stop
+28:716 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
+28:716 [Debug   ] Successfuly binded: port=8000 hostname=0.0.0.0
+28:716 [Info    ] Register 'handler' on route 'GET /'
+28:716 [Info    ] Web server running. Access it at: http://localhost:8000/
 ```
 
 Stop the server:
 
 ```shell
-$ kill -s SIGINT 16415
+$ kill -s SIGINT 52613
 $ █
 ```
 
@@ -223,11 +218,9 @@ Server logs:
 
 ```text
 …
-25:975 [Warn    ] Received signal SIGINT
-25:975 [Info    ] Stop server
-25:975 [Warn    ] Listener has been closed
-25:975 [Info    ] End processing connection
-25:976 [Info    ] Logging session complete.  Duration: 68584ms
+58:375 [Warn    ] Received signal SIGINT
+58:376 [Info    ] Stop server
+58:378 [Info    ] Logging session complete.  Duration: 31511ms
 $ █
 ```
 
@@ -288,18 +281,10 @@ $ █
 Server logs:
 
 ```text
-02:742 [Info    ] Handle connection
-02:743 [Info    ] Waiting for new request in connection#8
-02:743 [Info    ] Waiting for new connection
-02:743 [Info    ] Handle request
-02:744 [Debug   ] Request 'POST /execute/stop' matches route 'POST /execute/:cmd': apply handler 'handler'
-02:744 [Info    ] Waiting for new request in connection#8
-02:746 [Debug   ] No more request pending for connection#8
-02:746 [Info    ] End processing request in connection#8
-03:745 [Info    ] Stop server
-03:745 [Warn    ] Listener has been closed
-03:745 [Info    ] End processing connection
-03:746 [Info    ] Logging session complete.  Duration: 27074ms
+51:151 [Info    ] Handle request
+51:151 [Debug   ] Request 'POST /execute/stop' matches route 'POST /execute/:cmd': apply 'handler'
+52:154 [Info    ] Stop server
+52:156 [Info    ] Logging session complete.  Duration: 13450ms
 $ █
 ```
 
@@ -449,12 +434,12 @@ await new WebServer({
 Request:
 
 ```shell
-$ http :8000/
+$ http :8000/ "Accept:text/plain"
 HTTP/1.1 404 Not Found
 content-encoding: gzip
 content-length: 71
 content-type: text/plain;charset=UTF-8
-date: Thu, 10 Nov 2022 09:09:59 GMT
+date: Fri, 11 Nov 2022 13:28:24 GMT
 vary: Accept-Encoding
 
 Resource 'GET http://localhost:8000/' not found.
@@ -466,11 +451,10 @@ Server logs:
 
 ```text
 …
-59:727 [Info    ] Handle request
-59:727 [Debug   ] Request 'GET /' matches route 'ALL *': apply handler 'allRoutesHandler'
-59:728 [Warn    ] The request 'GET http://localhost:8000/' was here!
-59:728 [Debug   ] No response sent by routes: fallback to not found handler
-…
+19:822 [Info    ] Handle request
+19:822 [Debug   ] Request 'GET /' matches route 'ALL *': apply 'allRoutesHandler'
+19:822 [Warn    ] The request 'GET http://localhost:8000/' was here!
+19:822 [Debug   ] No response sent by routes: fallback to not found handler
 ```
 
 > It's possible to add a `method` property to refine matching criteria.

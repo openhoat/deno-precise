@@ -1,4 +1,5 @@
-import { camelCase, EventEmitter, getFreePort, Logger } from '../../../deps.ts'
+import type { ConnInfo, Handler } from '../../../deps.ts'
+import { camelCase, getFreePort, Logger, Server } from '../../../deps.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
   ErrorHandler,
@@ -10,6 +11,7 @@ import type {
   RequestHandlerSpec,
   ResolvedRequestHandlerResult,
 } from '../types/web/utils.d.ts'
+import { RequestHandlerContext } from '../types/web/utils.d.ts'
 import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
 import { asPromise, isDefinedObject, staticImplements, toNumber, toResponse } from '../helper.ts'
 import { defaults } from './defaults.ts'
@@ -17,19 +19,19 @@ import { hostnameForDisplay, HttpMethodSpecs } from './utils.ts'
 import { isRouter } from './router.ts'
 
 @staticImplements<StaticWebServerable>()
-class WebServer extends EventEmitter implements WebServerable {
-  #bindedPort?: number
+class WebServer implements WebServerable {
+  #binded?: Deno.NetAddr
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
   readonly #options?: WebServerOptions
   #routeHandlers?: NamedRouteHandler[]
   readonly #requestHandlerSpecs: RequestHandlerSpec[] = []
   readonly #routers: Routerable[] = []
-  #server?: Deno.Listener
+  #servePromise?: Promise<void>
+  #server?: Server
   readonly logger: Readonly<Logger>
 
   constructor(options?: WebServerOptions) {
-    super()
     this.logger = options?.logger ?? defaults.buildLogger()
     this.logger.info('Create web server')
     this.#options = options
@@ -46,51 +48,28 @@ class WebServer extends EventEmitter implements WebServerable {
     }
   }
 
+  get hostname(): string | undefined {
+    return this.#binded?.hostname
+  }
+
   get port(): number | undefined {
-    return this.#bindedPort
+    return this.#binded?.port
   }
 
   get started(): boolean {
     return isDefinedObject(this.#server)
   }
 
-  #accept() {
-    this.logger.info('Accept connection')
-    this.#waitFor('connection', async (server) => {
-      try {
-        const conn = await server.accept()
-        this.#handleConn(conn).catch((err) => {
-          this.emit('error', err)
-        })
-      } catch (err) {
-        if (err instanceof Deno.errors.BadResource) {
-          this.logger.warn(err.message)
-          return false
-        }
-        throw err
-      }
-    })
-      .then(() => {
-        this.emit('closed')
-      })
-      .catch((err) => {
-        this.emit('error', err)
-      })
-  }
-
   #applyRequestHandler(
-    requestEvent: Deno.RequestEvent,
+    request: Request,
     requestHandler: NamedRouteHandler,
-    responseSent: boolean,
-  ): Promise<boolean> {
-    const { request } = requestEvent
-    let result: RequestHandlerResult
+    context: RequestHandlerContext,
+  ): RequestHandlerResult {
     try {
-      result = requestHandler.handler(request, responseSent)
+      return requestHandler.handler(request, context)
     } catch (err) {
-      result = this.#errorHandler(request, err, responseSent)
+      return this.#errorHandler(request, err, context)
     }
-    return this.#handleResponse(requestEvent, requestHandler.name, result, responseSent)
   }
 
   #buildRouteHandler({
@@ -131,62 +110,30 @@ class WebServer extends EventEmitter implements WebServerable {
     }
   }
 
-  async #handleConn(conn: Deno.Conn) {
-    this.logger.info('Handle connection')
-    const httpConn = Deno.serveHttp(conn)
-    this.once('closing', () => {
-      httpConn.close()
-    })
-    await this.#waitFor(`request in connection#${conn.rid}`, async () => {
-      const requestEvent = await httpConn.nextRequest()
-      if (!requestEvent) {
-        this.logger.debug(`No more request pending for connection#${conn.rid}`)
-        return false
-      }
-      await this.#handleRequest(requestEvent)
-    })
-  }
-
-  async #handleRequest(requestEvent: Deno.RequestEvent) {
+  async #handleRequest(
+    request: Request,
+    connInfo: ConnInfo,
+  ): Promise<ResolvedRequestHandlerResult> {
     this.logger.info('Handle request')
     const routeHandlers = this.#routeHandlers
-    const responseSent =
+    const result =
       routeHandlers?.length &&
       (await routeHandlers.reduce(async (promise, requestHandler) => {
-        const responseSent = await promise
-        return this.#applyRequestHandler(requestEvent, requestHandler, responseSent)
-      }, Promise.resolve(false)))
-    if (!responseSent) {
+        const result = await asPromise(promise)
+        return this.#applyRequestHandler(request, requestHandler, {
+          connInfo,
+          result,
+        })
+      }, undefined as RequestHandlerResult))
+    if (!result) {
       this.logger.debug('No response sent by routes: fallback to not found handler')
-      await this.#applyRequestHandler(
-        requestEvent,
+      return this.#applyRequestHandler(
+        request,
         { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
-        false,
+        { connInfo },
       )
     }
-  }
-
-  async #handleResponse(
-    requestEvent: Deno.RequestEvent,
-    requestHandlerName: string,
-    requestHandlerResult: RequestHandlerResult,
-    responseSent: boolean,
-  ): Promise<boolean> {
-    const resolvedResult: ResolvedRequestHandlerResult = await asPromise(requestHandlerResult)
-    if (!resolvedResult) {
-      return responseSent
-    }
-    if (responseSent) {
-      this.logger.warn(
-        `Error in request handler '${requestHandlerName}': response has already been sent`,
-      )
-      return responseSent
-    }
-    const response = toResponse(resolvedResult)
-    if (response) {
-      await requestEvent.respondWith(response)
-    }
-    return true
+    return result
   }
 
   #prepareRouteHandlers() {
@@ -228,29 +175,6 @@ class WebServer extends EventEmitter implements WebServerable {
     return { handler: routeHandler, name: handlerName }
   }
 
-  async #waitFor(
-    name: string,
-    cb: (server: Deno.Listener) => Promise<void | boolean>,
-  ): Promise<void> {
-    const server = this.#server
-    while (true) {
-      if (!server) {
-        break
-      }
-      this.logger.info(`Waiting for new ${name}`)
-      try {
-        const result = await cb(server)
-        if (result === false) {
-          break
-        }
-      } catch (err) {
-        this.emit('error', err)
-        break
-      }
-    }
-    this.logger.info(`End processing ${name}`)
-  }
-
   register(requestHandlerSpecOrRouter: RequestHandlerSpec | Routerable): WebServerable {
     if (isRouter(requestHandlerSpecOrRouter)) {
       this.#registerRouter(requestHandlerSpecOrRouter)
@@ -275,18 +199,22 @@ class WebServer extends EventEmitter implements WebServerable {
     if (this.started) {
       throw new Error('Server is already started')
     }
+    const hostname = this.#options?.hostname ?? '0.0.0.0'
     const port =
       toNumber(Deno.env.get('PORT')) ?? (await getFreePort(this.#options?.port ?? defaults.port))
-    const listenOptions = { hostname: this.#options?.hostname ?? '0.0.0.0', port }
-    this.logger.debug(`Trying to bind: ${JSON.stringify(listenOptions)}`)
-    this.#server = Deno.listen(listenOptions)
-    this.#bindedPort = port
+    this.logger.debug(`Trying to bind: port=${port} hostname=${hostname}`)
+    const listener = Deno.listen({ hostname, port })
+    const binded = listener.addr as Deno.NetAddr
+    this.#binded = binded
+    this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
     this.#prepareRouteHandlers()
-    this.#accept()
+    const handler: Handler = async (request, connInfo): Promise<Response> =>
+      toResponse(await this.#handleRequest(request, connInfo))
+    const server = new Server({ handler })
+    this.#server = server
+    this.#servePromise = server.serve(listener)
     this.logger.info(
-      `Web server running. Access it at: http://${hostnameForDisplay(this.#options?.hostname)}:${
-        this.#bindedPort
-      }/`,
+      `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
     )
   }
 
@@ -296,14 +224,10 @@ class WebServer extends EventEmitter implements WebServerable {
     if (!isDefinedObject(server)) {
       throw new Error('Server is not started')
     }
-    await new Promise<void>((resolve) => {
-      this.emit('closing')
-      server.close()
-      this.#server = undefined
-      this.once('closed', () => {
-        resolve()
-      })
-    })
+    server.close()
+    await this.#servePromise
+    this.#server = undefined
+    this.#servePromise = undefined
   }
 }
 

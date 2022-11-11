@@ -1,4 +1,4 @@
-import type { EventEmitter, Logger } from '../../../../deps.ts'
+import type { Logger } from '../../../../deps.ts'
 import type { Routerable } from './router.d.ts'
 import type { ErrorHandler, NotFoundHandler, RequestHandlerSpec } from './utils.d.ts'
 
@@ -15,7 +15,8 @@ export interface StaticWebServerable {
   new (options?: WebServerOptions): WebServerable
 }
 
-export interface WebServerable extends EventEmitter {
+export interface WebServerable {
+  readonly hostname: string | undefined
   readonly logger: Readonly<Logger>
   readonly port: number | undefined
   readonly started: boolean

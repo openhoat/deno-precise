@@ -29,8 +29,8 @@ const buildLogger = () =>
       ),
   )
 
-const errorHandler: ErrorHandler = (req: Request, err: Error, responseSent: boolean) => {
-  if (responseSent) {
+const errorHandler: ErrorHandler = (req, err, context) => {
+  if (context.result) {
     return
   }
   return new Response(`Error encountered in request '${req.method} ${req.url}': ${err.message}.`, {

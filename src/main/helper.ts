@@ -33,14 +33,12 @@ export const toNumber = (s: unknown): number | undefined => {
   return isNaN(value) ? undefined : value
 }
 
-export const toResponse = (value?: Response | BodyInit | unknown): Response | undefined => {
+export const toResponse = (value?: Response | BodyInit | unknown): Response => {
   if (value instanceof Response) {
     return value
   }
   if (isBodyInit(value)) {
     return new Response(value)
   }
-  if (typeof value === 'object') {
-    return Response.json(value)
-  }
+  return Response.json(value)
 }

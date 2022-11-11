@@ -1,3 +1,4 @@
+import type { ConnInfo } from '../../../../deps.ts'
 import { WebServerable } from './server.d.ts'
 
 export type HttpMethod =
@@ -27,23 +28,29 @@ export type ErrorHandler = (
   this: WebServerable,
   req: RequestWithRouteParams,
   err: Error,
-  responseSent: boolean,
+  context: RequestHandlerContext,
 ) => RequestHandlerResult
 
 export type NotFoundHandler = (
   this: WebServerable,
   req: RequestWithRouteParams,
+  context: RequestHandlerContext,
 ) => RequestHandlerResult
+
+export type RequestHandlerContext = {
+  connInfo: ConnInfo
+  result?: RequestHandlerResult
+}
 
 export type RequestHandler = (
   this: WebServerable,
   req: RequestWithRouteParams,
-  responseSent: boolean,
+  context: RequestHandlerContext,
 ) => RequestHandlerResult
 
 export type RouteHandler = (
   req: RequestWithRouteParams,
-  responseSent: boolean,
+  context: RequestHandlerContext,
 ) => RequestHandlerResult
 
 export interface RequestHandlerSpec {
