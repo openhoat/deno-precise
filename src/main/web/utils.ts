@@ -1,3 +1,5 @@
+import { RequestHandler, RequestHandlerSpec } from '../types/web/utils.d.ts'
+
 export enum HttpMethods {
   DELETE = 'DELETE',
   GET = 'GET',
@@ -28,4 +30,16 @@ export const hostnameForDisplay = (hostname?: string): string => {
   // because browsers in Windows don't resolve "0.0.0.0".
   // See the discussion in https://github.com/denoland/deno_std/issues/1165
   return !hostname || hostname === '0.0.0.0' ? 'localhost' : hostname
+}
+
+export const toRequestHandlerSpecs = (
+  handlers: RequestHandlerSpec[] | RequestHandlerSpec | RequestHandler,
+): RequestHandlerSpec[] => {
+  if (typeof handlers === 'function') {
+    return [{ handler: handlers }]
+  }
+  if ('length' in handlers) {
+    return handlers
+  }
+  return [handlers]
 }

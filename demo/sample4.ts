@@ -1,8 +1,8 @@
 import { WebServer } from '../mod.ts'
 
 const webServer = new WebServer()
-webServer.setErrorHandler((req: Request, err: Error, responseSent: boolean) => {
-  if (responseSent) {
+webServer.setErrorHandler((req, err, context) => {
+  if (context.result) {
     return
   }
   return Response.json(

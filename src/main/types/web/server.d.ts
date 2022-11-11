@@ -1,10 +1,15 @@
 import type { Logger } from '../../../../deps.ts'
 import type { Routerable } from './router.d.ts'
-import type { ErrorHandler, NotFoundHandler, RequestHandlerSpec } from './utils.d.ts'
+import type {
+  ErrorHandler,
+  NotFoundHandler,
+  RequestHandler,
+  RequestHandlerSpec,
+} from './utils.d.ts'
 
 export type WebServerOptions = Partial<{
   errorHandler: ErrorHandler
-  handlers: RequestHandlerSpec[]
+  handlers: RequestHandlerSpec[] | RequestHandlerSpec | RequestHandler
   hostname: string
   notFoundHandler: NotFoundHandler
   logger: Logger
@@ -14,6 +19,8 @@ export type WebServerOptions = Partial<{
 export interface StaticWebServerable {
   new (options?: WebServerOptions): WebServerable
 }
+
+export type WebServerStartOptions = Partial<{ syncServe: boolean }>
 
 export interface WebServerable {
   readonly hostname: string | undefined
@@ -25,7 +32,7 @@ export interface WebServerable {
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
 
-  start(): Promise<void>
+  start(options?: WebServerStartOptions): Promise<void>
 
   stop(): Promise<void>
 }

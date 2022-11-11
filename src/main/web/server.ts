@@ -1,5 +1,5 @@
 import type { ConnInfo, Handler } from '../../../deps.ts'
-import { camelCase, getFreePort, Logger, Server } from '../../../deps.ts'
+import { camelCase, Logger, Server } from '../../../deps.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
   ErrorHandler,
@@ -13,9 +13,10 @@ import type {
 } from '../types/web/utils.d.ts'
 import { RequestHandlerContext } from '../types/web/utils.d.ts'
 import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
+import { WebServerStartOptions } from '../types/web/server.d.ts'
 import { asPromise, isDefinedObject, staticImplements, toNumber, toResponse } from '../helper.ts'
 import { defaults } from './defaults.ts'
-import { hostnameForDisplay, HttpMethodSpecs } from './utils.ts'
+import { hostnameForDisplay, HttpMethodSpecs, toRequestHandlerSpecs } from './utils.ts'
 import { isRouter } from './router.ts'
 
 @staticImplements<StaticWebServerable>()
@@ -42,7 +43,7 @@ class WebServer implements WebServerable {
       this.setNotFoundHandler(options.notFoundHandler)
     }
     if (options?.handlers) {
-      options.handlers.forEach((handler) => {
+      toRequestHandlerSpecs(options.handlers).forEach((handler) => {
         this.register(handler)
       })
     }
@@ -194,14 +195,13 @@ class WebServer implements WebServerable {
     this.#notFoundHandler = notFoundHandler
   }
 
-  async start() {
+  async start(options?: WebServerStartOptions) {
     this.logger.info('Start server')
     if (this.started) {
       throw new Error('Server is already started')
     }
-    const hostname = this.#options?.hostname ?? '0.0.0.0'
-    const port =
-      toNumber(Deno.env.get('PORT')) ?? (await getFreePort(this.#options?.port ?? defaults.port))
+    const hostname = this.#options?.hostname
+    const port = toNumber(Deno.env.get('PORT')) ?? this.#options?.port ?? defaults.port
     this.logger.debug(`Trying to bind: port=${port} hostname=${hostname}`)
     const listener = Deno.listen({ hostname, port })
     const binded = listener.addr as Deno.NetAddr
@@ -210,12 +210,19 @@ class WebServer implements WebServerable {
     this.#prepareRouteHandlers()
     const handler: Handler = async (request, connInfo): Promise<Response> =>
       toResponse(await this.#handleRequest(request, connInfo))
-    const server = new Server({ handler })
+    const server = new Server({
+      handler,
+    })
     this.#server = server
-    this.#servePromise = server.serve(listener)
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
     )
+    const servePromise = server.serve(listener)
+    if (options?.syncServe) {
+      await servePromise
+      return
+    }
+    this.#servePromise = servePromise
   }
 
   async stop() {

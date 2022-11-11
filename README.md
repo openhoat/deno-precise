@@ -300,8 +300,8 @@ Feel free to use custom not found and error handlers.
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
-webServer.setErrorHandler((req: Request, err: Error, responseSent: boolean) => {
-  if (responseSent) {
+webServer.setErrorHandler((req, err, context) => {
+  if (context.result) {
     return
   }
   return Response.json(
@@ -369,8 +369,8 @@ Or in a simpler all-in-one form, as in [`demo/sample5.ts`](demo/sample5.ts):
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 await new WebServer({
-  errorHandler: (req: Request, err: Error, responseSent: boolean) => {
-    if (responseSent) {
+  errorHandler: (req, err, context) => {
+    if (context.result) {
       return
     }
     return Response.json(
@@ -381,7 +381,7 @@ await new WebServer({
       { status: 500 },
     )
   },
-  notFoundHandler: (req: Request) =>
+  notFoundHandler: (req) =>
     Response.json(
       {
         code: 'NOT_FOUND',
@@ -389,14 +389,12 @@ await new WebServer({
       },
       { status: 404 },
     ),
-  handlers: [
-    {
-      path: '/oops',
-      handler: () => {
-        throw new Error('oops')
-      },
+  handlers: {
+    path: '/oops',
+    handler: () => {
+      throw new Error('oops')
     },
-  ],
+  },
 }).start()
 ```
 
@@ -420,14 +418,10 @@ To register a middleware handling all routes, simply omit the `path`.
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 await new WebServer({
-  handlers: [
-    {
-      handler: function allRoutesHandler(req) {
-        this.logger.warn(`The request '${req.method} ${req.url}' was here!`)
-        // Do something useful with the request
-      },
-    },
-  ],
+  handlers: function allRoutesHandler(req) {
+    this.logger.warn(`The request '${req.method} ${req.url}' was here!`)
+    // Do something useful with the request
+  },
 }).start()
 ```
 

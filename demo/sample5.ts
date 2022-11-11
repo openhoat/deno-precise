@@ -1,8 +1,8 @@
 import { WebServer } from '../mod.ts'
 
 await new WebServer({
-  errorHandler: (req: Request, err: Error, responseSent: boolean) => {
-    if (responseSent) {
+  errorHandler: (req, err, context) => {
+    if (context.result) {
       return
     }
     return Response.json(
@@ -13,7 +13,7 @@ await new WebServer({
       { status: 500 },
     )
   },
-  notFoundHandler: (req: Request) =>
+  notFoundHandler: (req) =>
     Response.json(
       {
         code: 'NOT_FOUND',
@@ -21,12 +21,10 @@ await new WebServer({
       },
       { status: 404 },
     ),
-  handlers: [
-    {
-      path: '/oops',
-      handler: () => {
-        throw new Error('oops')
-      },
+  handlers: {
+    path: '/oops',
+    handler: () => {
+      throw new Error('oops')
     },
-  ],
+  },
 }).start()
