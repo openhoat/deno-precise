@@ -120,11 +120,12 @@ class WebServer implements WebServerable {
     const result =
       routeHandlers?.length &&
       (await routeHandlers.reduce(async (promise, requestHandler) => {
-        const result = await asPromise(promise)
-        return this.#applyRequestHandler(request, requestHandler, {
+        const lastResult = await asPromise(promise)
+        const result = await this.#applyRequestHandler(request, requestHandler, {
           connInfo,
-          result,
+          result: lastResult,
         })
+        return result ?? lastResult
       }, undefined as RequestHandlerResult))
     if (!result) {
       this.logger.debug('No response sent by routes: fallback to not found handler')

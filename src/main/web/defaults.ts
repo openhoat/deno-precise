@@ -3,6 +3,7 @@ import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
 import {
   Accepts,
   ConsoleStream,
+  fromFileUrl,
   join,
   Level,
   Logger,
@@ -11,8 +12,7 @@ import {
   TokenReplacer,
 } from '../../../deps.ts'
 
-const __dirname = new URL('.', import.meta.url).pathname
-const baseDir = resolve(__dirname, '..', '..', '..')
+const baseDir = resolve(fromFileUrl(import.meta.url), '..', '..', '..', '..')
 
 const buildLogger = () =>
   Object.freeze(

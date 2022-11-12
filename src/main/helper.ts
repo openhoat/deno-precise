@@ -3,6 +3,8 @@ import { StaticImplements } from './types/helper.d.ts'
 export const asPromise = <T>(result: Promise<T> | T): Promise<T> =>
   isPromise(result) ? result : Promise.resolve(result)
 
+export const fileExtension = (filename: string) => lastIndex(filename.split('.'))
+
 export const isBodyInit = (value: unknown): value is BodyInit => {
   return (
     typeof value === 'string' ||
@@ -18,6 +20,8 @@ export const isDefinedObject = <T>(o: T | undefined): o is T => !!o && typeof o 
 
 export const isPromise = <T>(result: Promise<T> | T): result is Promise<T> =>
   result && typeof result === 'object' && typeof (result as Promise<void>).then === 'function'
+
+export const lastIndex = <T>(a: T[]): T => a[a.length - 1]
 
 // Workaround for class static members interface : https://stackoverflow.com/questions/13955157/how-to-define-static-property-in-typescript-interface
 export const staticImplements: StaticImplements =
