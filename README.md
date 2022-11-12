@@ -167,6 +167,8 @@ Precise supports [Deno deploy](https://deno.com/deploy) out-of-the-box.
 Live demo:
 
 - hello route: [precise.deno.dev/hello](https://precise.deno.dev/hello)
+- HTML file: [precise.deno.dev/assets/index.html](https://precise.deno.dev/assets/index.html)
+- TXT file: [precise.deno.dev/assets/hello.txt](https://precise.deno.dev/assets/hello.txt)
 - not found fallback: [precise.deno.dev/oops](https://precise.deno.dev/oops)
 
 Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
@@ -180,6 +182,7 @@ Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
 - [x] [Middlewares](#middlewares)
 - [x] [Routers](#routers)
 - [x] [Logging](#logging)
+- [x] [Assets / static files](#assets)
 
 ### Signals handling
 
@@ -547,6 +550,51 @@ const logger = new Logger()
   )
 
 export default logger
+```
+
+### Assets
+
+Precise provides a middleware to serve static files, it takes a `root` folder and an optional `prefix`.
+
+[`demo/sample9.ts`](demo/sample9.ts):
+
+```typescript
+import { fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import { WebServer, assets } from 'https://deno.land/x/precise/mod.ts'
+
+const assetsBaseDir = resolve(fromFileUrl(import.meta.url), '..', 'assets')
+const webServer = new WebServer()
+webServer.register(assets({ root: assetsBaseDir }))
+await webServer.start()
+```
+
+Browse [/assets/index.html](http://localhost:8000/assets/index.html):
+
+![](assets/img/sample-page-screenshot.png)
+
+Server logs:
+
+```text
+59:779 [Info    ] Handle request
+59:779 [Debug   ] Request 'GET /assets/index.html' matches route 'GET /assets/:path': apply 'assetsHandler'
+59:779 [Debug   ] Successfuly served static file from '/assets/index.html'
+59:788 [Info    ] Handle request
+59:788 [Debug   ] Request 'GET /assets/logo.png' matches route 'GET /assets/:path': apply 'assetsHandler'
+59:788 [Debug   ] Successfuly served static file from '/assets/logo.png'
+```
+
+Mime type is computed based on file extension: [/assets/hello.txt](http://localhost:8000/assets/hello.txt)
+
+```shell
+$ http :8000/assets/hello.txt
+HTTP/1.1 200 OK
+content-length: 6
+content-type: text/plain
+date: Sat, 12 Nov 2022 10:14:32 GMT
+vary: Accept-Encoding
+
+World!
+
 ```
 
 ## License
