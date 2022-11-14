@@ -559,10 +559,11 @@ Precise provides a middleware to serve static files, it takes a `root` folder an
 [`demo/sample9.ts`](demo/sample9.ts):
 
 ```typescript
-import { fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
 import { WebServer, assets } from 'https://deno.land/x/precise/mod.ts'
 
-const assetsBaseDir = resolve(fromFileUrl(import.meta.url), '..', 'assets')
+const __dirname = dirname(fromFileUrl(import.meta.url))
+const assetsBaseDir = resolve(__dirname, 'assets')
 const webServer = new WebServer()
 webServer.register(assets({ root: assetsBaseDir }))
 await webServer.start()

@@ -1,4 +1,4 @@
-import { fromFileUrl, join, resolve } from '../../../deps/std.ts'
+import { dirname, fromFileUrl, join, resolve } from '../../../deps/std.ts'
 import { Accepts } from '../../../deps/x/accepts.ts'
 import {
   ConsoleStream,
@@ -10,7 +10,8 @@ import {
 import type { WebServerDefaults } from '../types/web/defaults.d.ts'
 import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
 
-const baseDir = resolve(fromFileUrl(import.meta.url), '..', '..', '..', '..')
+const __dirname = dirname(fromFileUrl(import.meta.url))
+const baseDir = resolve(__dirname, '..', '..', '..')
 
 const buildLogger = () =>
   Object.freeze(
