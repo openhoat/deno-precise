@@ -1,5 +1,7 @@
-import type { ConnInfo, Handler } from '../../../deps.ts'
-import { camelCase, Logger, Server } from '../../../deps.ts'
+import type { ConnInfo, Handler } from '../../../deps/std.ts'
+import { Server } from '../../../deps/std.ts'
+import { camelCase } from '../../../deps/x/camelcase.ts'
+import { Logger } from '../../../deps/x/optic.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
   ErrorHandler,

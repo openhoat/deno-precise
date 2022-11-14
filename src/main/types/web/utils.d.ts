@@ -1,4 +1,4 @@
-import type { ConnInfo } from '../../../../deps.ts'
+import type { ConnInfo } from '../../../../deps/std.ts'
 import { WebServerable } from './server.d.ts'
 
 export type HttpMethod =

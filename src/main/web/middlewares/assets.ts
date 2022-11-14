@@ -1,6 +1,7 @@
+import { join } from '../../../../deps/std.ts'
+import { mime } from '../../../../deps/x/mimetypes.ts'
 import type { WebServerable } from '../../types/web/server.d.ts'
 import type { RequestHandlerSpec, RequestWithRouteParams } from '../../types/web/utils.d.ts'
-import { join, mime } from '../../../../deps.ts'
 import { fileExtension } from '../../helper.ts'
 
 type AssetsHandlerOptions = {
@@ -10,6 +11,7 @@ type AssetsHandlerOptions = {
 
 const assets: (options: AssetsHandlerOptions) => RequestHandlerSpec = (options) => {
   const { prefix = '/assets', root } = options
+
   async function handler(this: WebServerable, req: RequestWithRouteParams) {
     if (typeof req.params?.path !== 'string') {
       return
@@ -30,6 +32,7 @@ const assets: (options: AssetsHandlerOptions) => RequestHandlerSpec = (options) 
       throw err
     }
   }
+
   return { name: 'assetsHandler', handler, path: `${prefix}/:path` }
 }
 

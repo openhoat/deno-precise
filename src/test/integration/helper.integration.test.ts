@@ -1,4 +1,4 @@
-import { assert, assertEquals } from '../../../dev_deps.ts'
+import { assert, assertEquals } from '../../../dev_deps/std.ts'
 import { asPromise, isBodyInit, toNumber } from '../../main/helper.ts'
 import { description, eachAsync } from '../utils.ts'
 

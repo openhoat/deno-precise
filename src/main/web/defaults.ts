@@ -1,16 +1,14 @@
-import type { WebServerDefaults } from '../types/web/defaults.d.ts'
-import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
+import { fromFileUrl, join, resolve } from '../../../deps/std.ts'
+import { Accepts } from '../../../deps/x/accepts.ts'
 import {
-  Accepts,
   ConsoleStream,
-  fromFileUrl,
-  join,
   Level,
   Logger,
   longestLevelName,
-  resolve,
   TokenReplacer,
-} from '../../../deps.ts'
+} from '../../../deps/x/optic.ts'
+import type { WebServerDefaults } from '../types/web/defaults.d.ts'
+import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
 
 const baseDir = resolve(fromFileUrl(import.meta.url), '..', '..', '..', '..')
 

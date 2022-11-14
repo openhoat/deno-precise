@@ -1,4 +1,4 @@
-import type { Logger } from '../../../../deps.ts'
+import type { Logger } from '../../../../deps/x/optic.ts'
 import type { Routerable } from './router.d.ts'
 import type {
   ErrorHandler,

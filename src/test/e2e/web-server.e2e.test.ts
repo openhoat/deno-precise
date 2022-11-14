@@ -1,5 +1,5 @@
-import { Level, Logger } from '../../../deps.ts'
-import { assertEquals } from '../../../dev_deps.ts'
+import { assertEquals } from '../../../dev_deps/std.ts'
+import { Level, Logger } from '../../../deps/x/optic.ts'
 import { WebServer } from '../../../mod.ts'
 import { description } from '../utils.ts'
 
