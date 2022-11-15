@@ -1,5 +1,5 @@
 import { assert, assertEquals } from '../../../dev_deps/std.ts'
-import { asPromise, isBodyInit, toNumber } from '../../main/helper.ts'
+import { asPromise, fileExtension, isBodyInit, toNumber, toResponse } from '../../main/helper.ts'
 import { description, eachAsync } from '../utils.ts'
 
 Deno.test('helper integration tests', async (t) => {
@@ -33,6 +33,22 @@ Deno.test('helper integration tests', async (t) => {
       },
     )
   })
+  await t.step('fileExtension', async (t) => {
+    await t.step(
+      description(
+        {
+          given: 'foo.txt',
+          should: 'return txt',
+        },
+        2,
+      ),
+      () => {
+        const filename = 'foo.txt'
+        const result = fileExtension(filename)
+        assert(result === 'txt')
+      },
+    )
+  })
   await t.step('isBodyInit', async (t) => {
     await t.step(
       description(
@@ -62,6 +78,34 @@ Deno.test('helper integration tests', async (t) => {
         assert(result === true)
       },
     )
+    await t.step(
+      description(
+        {
+          given: 'an array buffer',
+          should: 'return true',
+        },
+        2,
+      ),
+      () => {
+        const value = new ArrayBuffer(0)
+        const result = isBodyInit(value)
+        assert(result === true)
+      },
+    )
+    await t.step(
+      description(
+        {
+          given: "{ foo: 'bar' }",
+          should: 'return false',
+        },
+        2,
+      ),
+      () => {
+        const value = { foo: 'bar' }
+        const result = isBodyInit(value)
+        assert(result === false)
+      },
+    )
   })
   await t.step('toNumber', async (t) => {
     const testCases = [
@@ -86,5 +130,49 @@ Deno.test('helper integration tests', async (t) => {
         },
       )
     })
+  })
+  await t.step('toResponse', async (t) => {
+    await t.step(
+      description(
+        {
+          given: 'a response',
+          should: 'return the given response',
+        },
+        2,
+      ),
+      () => {
+        const value = new Response('foo')
+        const result = toResponse(value)
+        assert(result === value)
+      },
+    )
+    await t.step(
+      description(
+        {
+          given: 'a body',
+          should: 'return the given response',
+        },
+        2,
+      ),
+      () => {
+        const value = 'foo'
+        const result = toResponse(value)
+        assert(result instanceof Response)
+      },
+    )
+    await t.step(
+      description(
+        {
+          given: 'a literal object',
+          should: 'return a response',
+        },
+        2,
+      ),
+      () => {
+        const value = { foo: 'bar' }
+        const result = toResponse(value)
+        assert(result instanceof Response)
+      },
+    )
   })
 })
