@@ -74,16 +74,13 @@ scripts:
   'sonar:scan':
     desc: Run a SonarQube scan
     cmd:
-      - sed "s|SF:${PWD}/|SF:|g" dist/coverage/lcov.info > dist/coverage/lcov-rel.info
       - >
         docker run --rm
         -e SONAR_HOST_URL
-        -e SONAR_SCANNER_OPTS
         -e SONAR_LOGIN
-        -e SONAR_SCANNER_OPTS="-Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.typescript.lcov.reportPaths=${SONAR_LCOV_REPORT_PATH} -Dsonar.sources=${SONAR_SOURCES} -Dsonar.tests=${SONAR_TESTS}"
-        -v "${PWD}:/usr/src"
+        -e SONAR_SCANNER_OPTS="-Dsonar.projectBaseDir=${PWD}"
+        -v "${PWD}:${PWD}"
         sonarsource/sonar-scanner-cli
-    envFile: .sonar_env
   test:
     desc: Run the tests
     cmd: deno test ./src/test
