@@ -11,6 +11,7 @@ import type {
   RequestHandler,
   RequestHandlerResult,
   RequestHandlerSpec,
+  RequestWithRouteParams,
   ResolvedRequestHandlerResult,
 } from '../types/web/utils.d.ts'
 import { RequestHandlerContext } from '../types/web/utils.d.ts'
@@ -30,6 +31,11 @@ import { isRouter } from './router.ts'
 
 @staticImplements<StaticWebServerable>()
 class WebServer implements WebServerable {
+  #beforeResponseHook?: (
+    response: Response,
+    req: RequestWithRouteParams,
+    connInfo: ConnInfo,
+  ) => RequestHandlerResult
   #binded?: Deno.NetAddr
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
@@ -71,14 +77,14 @@ class WebServer implements WebServerable {
   }
 
   #applyRequestHandler(
-    request: Request,
+    req: Request,
     requestHandler: NamedRouteHandler,
     context: RequestHandlerContext,
   ): RequestHandlerResult {
     try {
-      return requestHandler.handler(request, context)
+      return requestHandler.handler(req, context)
     } catch (err) {
-      return this.#errorHandler(request, err, context)
+      return this.#errorHandler(req, err, context)
     }
   }
 
@@ -120,17 +126,14 @@ class WebServer implements WebServerable {
     }
   }
 
-  async #handleRequest(
-    request: Request,
-    connInfo: ConnInfo,
-  ): Promise<ResolvedRequestHandlerResult> {
+  async #handleRequest(req: Request, connInfo: ConnInfo): Promise<ResolvedRequestHandlerResult> {
     this.logger.info('Handle request')
     const routeHandlers = this.#routeHandlers
-    const result =
+    const result: RequestHandlerResult =
       routeHandlers?.length &&
       (await routeHandlers.reduce(async (promise, requestHandler) => {
         const lastResult = await asPromise(promise)
-        const requestResult = await this.#applyRequestHandler(request, requestHandler, {
+        const requestResult = await this.#applyRequestHandler(req, requestHandler, {
           connInfo,
           result: lastResult,
         })
@@ -139,7 +142,7 @@ class WebServer implements WebServerable {
     if (!result) {
       this.logger.debug('No response sent by routes: fallback to not found handler')
       return this.#applyRequestHandler(
-        request,
+        req,
         { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
         { connInfo },
       )
@@ -195,6 +198,17 @@ class WebServer implements WebServerable {
     return this
   }
 
+  setBeforeResponse(
+    middleware: (
+      response: Response,
+      req: RequestWithRouteParams,
+      connInfo: ConnInfo,
+    ) => RequestHandlerResult,
+  ) {
+    this.logger.debug(`Set before response middleware (name: ${middleware.name})`)
+    this.#beforeResponseHook = middleware
+  }
+
   setErrorHandler(errorHandler: ErrorHandler) {
     this.logger.debug(`Set error handler (name: ${errorHandler.name})`)
     this.#errorHandler = errorHandler
@@ -220,8 +234,14 @@ class WebServer implements WebServerable {
       this.#binded = binded
     }
     this.#prepareRouteHandlers()
-    const handler: Handler = async (request, connInfo): Promise<Response> =>
-      toResponse(await this.#handleRequest(request, connInfo))
+    const handler: Handler = async (req, connInfo): Promise<Response> => {
+      const response = toResponse(await this.#handleRequest(req, connInfo))
+      const beforeResponseHook = this.#beforeResponseHook
+      const hookResponse =
+        beforeResponseHook && (await asPromise(beforeResponseHook(response, req, connInfo)))
+      const finalResponse = hookResponse || response
+      return toResponse(finalResponse)
+    }
     const server = new Server({
       handler,
     })

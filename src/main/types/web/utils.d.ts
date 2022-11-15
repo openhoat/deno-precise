@@ -60,6 +60,12 @@ export interface RequestWithRouteParams extends Request {
 
 export type ResolvedRequestHandlerResult = Response | BodyInit | unknown | void
 
+export type ResponseHook = (
+  response: Response,
+  req: RequestWithRouteParams,
+  connInfo: ConnInfo,
+) => RequestHandlerResult
+
 export type RouteHandler = (
   req: RequestWithRouteParams,
   context: RequestHandlerContext,

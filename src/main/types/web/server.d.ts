@@ -5,6 +5,7 @@ import type {
   NotFoundHandler,
   RequestHandler,
   RequestHandlerSpec,
+  ResponseHook,
 } from './utils.d.ts'
 
 export type WebServerOptions = Partial<{
@@ -29,6 +30,10 @@ export interface WebServerable {
   readonly started: boolean
 
   register(requestHandlerSpec: RequestHandlerSpec | Routerable): WebServerable
+
+  setBeforeResponse(middleware: ResponseHook): void
+
+  setErrorHandler(errorHandler: ErrorHandler): void
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
 
