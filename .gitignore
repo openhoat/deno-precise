@@ -1,7 +1,7 @@
 .idea/
 .scannerwork/
 .vscode/
-.envrc
-
 dist/
 tmp/
+.envrc
+deno.lock
