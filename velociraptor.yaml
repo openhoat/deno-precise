@@ -81,7 +81,7 @@ scripts:
         docker run --rm
         -e SONAR_HOST_URL
         -e SONAR_LOGIN
-        -e SONAR_SCANNER_OPTS="-Dsonar.projectBaseDir=${PWD} -Dsonar.projectVersion=$(deno run src/main/version.ts)"
+        -e SONAR_SCANNER_OPTS="-Dsonar.projectBaseDir=${PWD} -Dsonar.projectVersion=$(echo "import version from './version.ts';console.log(version)" | deno run -)"
         -v "${PWD}:${PWD}"
         sonarsource/sonar-scanner-cli
   test:
@@ -116,4 +116,4 @@ scripts:
           - vr test:watch
   'version.ts:update':
     desc: Update version.ts with the latest Git tag
-    cmd: sed -i "1s/.*/const version = '$(git describe --tags --abbrev=0)'/" src/main/version.ts
+    cmd: sed -i "1s/.*/const version = '$(git describe --tags --abbrev=0)'/" version.ts

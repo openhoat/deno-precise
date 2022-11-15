@@ -1,3 +1,7 @@
+import version from './version.ts'
+
+export { version }
+
 export * from './src/main/types/helper.d.ts'
 export * from './src/main/types/web/defaults.d.ts'
 export * from './src/main/types/web/router.d.ts'
