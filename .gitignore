@@ -1,5 +1,7 @@
 .idea/
+.scannerwork/
 .vscode/
+.envrc
 
 dist/
 tmp/

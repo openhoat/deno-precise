@@ -1,0 +1,4 @@
+SONAR_PROJECT_KEY='deno_precise'
+SONAR_LCOV_REPORT_PATH='dist/coverage/lcov-rel.info'
+SONAR_SOURCES='src/main'
+SONAR_TESTS='src/test'
