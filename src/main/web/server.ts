@@ -16,7 +16,14 @@ import type {
 import { RequestHandlerContext } from '../types/web/utils.d.ts'
 import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
 import { WebServerStartOptions } from '../types/web/server.d.ts'
-import { asPromise, isDefinedObject, staticImplements, toNumber, toResponse } from '../helper.ts'
+import {
+  asPromise,
+  isDefinedObject,
+  isNetAddr,
+  staticImplements,
+  toNumber,
+  toResponse,
+} from '../helper.ts'
 import { defaults } from './defaults.ts'
 import { hostnameForDisplay, HttpMethodSpecs, toRequestHandlerSpecs } from './utils.ts'
 import { isRouter } from './router.ts'
@@ -207,9 +214,11 @@ class WebServer implements WebServerable {
     const port = toNumber(Deno.env.get('PORT')) ?? this.#options?.port ?? defaults.port
     this.logger.debug(`Trying to bind: port=${port} hostname=${hostname}`)
     const listener = Deno.listen({ hostname, port })
-    const binded = listener.addr as Deno.NetAddr
-    this.#binded = binded
-    this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
+    const binded = isNetAddr(listener.addr) ? listener.addr : undefined
+    if (binded) {
+      this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
+      this.#binded = binded
+    }
     this.#prepareRouteHandlers()
     const handler: Handler = async (request, connInfo): Promise<Response> =>
       toResponse(await this.#handleRequest(request, connInfo))

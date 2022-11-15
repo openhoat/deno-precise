@@ -16,6 +16,8 @@ export const isBodyInit = (value: unknown): value is BodyInit => {
   )
 }
 
+export const isNetAddr = (addr: Deno.Addr): addr is Deno.NetAddr => 'port' in addr
+
 export const isDefinedObject = <T>(o: T | undefined): o is T => !!o && typeof o === 'object'
 
 export const isPromise = <T>(result: Promise<T> | T): result is Promise<T> =>
