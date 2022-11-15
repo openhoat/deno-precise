@@ -183,6 +183,7 @@ Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
 - [x] [Routers](#routers)
 - [x] [Logging](#logging)
 - [x] [Assets / static files](#assets)
+- [x] [Hooks](#hooks)
 
 ### Signals handling
 
@@ -596,6 +597,44 @@ vary: Accept-Encoding
 
 World!
 
+$ █
+```
+
+### Hooks
+
+Precise provides hooks to apply side effects or to change the response.
+
+[`demo/sample10.ts`](demo/sample10.ts):
+
+```typescript
+import { exposeVersion, WebServer } from 'https://deno.land/std@0.162.0/path/mod.ts'
+
+const webServer = new WebServer()
+webServer.setBeforeResponse(exposeVersion)
+webServer.register({
+  path: '/',
+  handler: () => ({ foo: 'bar' }),
+})
+await webServer.start()
+```
+
+> In this example, we use a provided 'exposeVersion' middleware to change the response headers juste before sending
+> response to the client. Feel free to use your own…
+
+```shell
+$ http :8000/
+HTTP/1.1 200 OK
+content-length: 13
+content-type: application/json
+date: Tue, 15 Nov 2022 17:24:35 GMT
+vary: Accept-Encoding
+x-powered-by: Precise/0.0.16
+
+{
+    "foo": "bar"
+}
+
+$ █
 ```
 
 ## License
