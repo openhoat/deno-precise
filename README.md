@@ -85,12 +85,7 @@ $ █
 ```typescript
 import { WebServer } from 'https://deno.land/x/precise/mod.ts'
 
-await new WebServer()
-  .register({
-    path: '/',
-    handler: () => ({ foo: 'bar' }),
-  })
-  .start()
+await new WebServer().get('/', () => ({ foo: 'bar' })).start()
 ```
 
 > A request handler can return either:
