@@ -1,5 +1,6 @@
 import type { ConnInfo } from '../../../../deps/std.ts'
 import { WebServerable } from './server.d.ts'
+import { Routerable } from './router.d.ts'
 
 export type ErrorHandler = (
   this: WebServerable,
@@ -21,6 +22,28 @@ export type HttpMethod =
 
 export type HttpMethodSpec = HttpMethod | 'ALL'
 
+export interface MethodRegisterable<T extends Registerable<T>> {
+  all(path: string, handler: RequestHandler): T
+
+  delete(path: string, handler: RequestHandler): T
+
+  get(path: string, handler: RequestHandler): T
+
+  head(path: string, handler: RequestHandler): T
+
+  options(path: string, handler: RequestHandler): T
+
+  patch(path: string, handler: RequestHandler): T
+
+  post(path: string, handler: RequestHandler): T
+
+  purge(path: string, handler: RequestHandler): T
+
+  put(path: string, handler: RequestHandler): T
+
+  trace(path: string, handler: RequestHandler): T
+}
+
 export interface NamedRouteHandler {
   handler: RouteHandler
   name: string
@@ -31,6 +54,10 @@ export type NotFoundHandler = (
   req: RequestWithRouteParams,
   context: RequestHandlerContext,
 ) => RequestHandlerResult
+
+export interface Registerable<T> {
+  register(requestHandlerSpec: RequestHandlerSpec | Routerable): T
+}
 
 export type RequestHandler = (
   this: WebServerable,

@@ -1,6 +1,5 @@
 import type { ConnInfo, Handler } from '../../../deps/std.ts'
 import { Server } from '../../../deps/std.ts'
-import { camelCase } from '../../../deps/x/camelcase.ts'
 import { Logger } from '../../../deps/x/optic.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
@@ -26,11 +25,17 @@ import {
   toResponse,
 } from '../helper.ts'
 import { defaults } from './defaults.ts'
-import { hostnameForDisplay, HttpMethodSpecs, toRequestHandlerSpecs } from './utils.ts'
+import {
+  hostnameForDisplay,
+  HttpMethodSpecs,
+  routeToString,
+  toRequestHandlerSpecs,
+} from './utils.ts'
 import { isRouter } from './router.ts'
+import { MethodRegisterer } from './method-registerer.ts'
 
 @staticImplements<StaticWebServerable>()
-class WebServer implements WebServerable {
+class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
   #beforeResponseHook?: (
     response: Response,
     req: RequestWithRouteParams,
@@ -48,6 +53,7 @@ class WebServer implements WebServerable {
   readonly logger: Readonly<Logger>
 
   constructor(options?: WebServerOptions) {
+    super()
     this.logger = options?.logger ?? defaults.buildLogger()
     this.logger.info('Create web server')
     this.#options = options
@@ -176,8 +182,7 @@ class WebServer implements WebServerable {
     } = requestHandlerSpec
     const urlPattern = pathname ? new URLPattern({ pathname }) : undefined
     const methodToMatch = urlPattern ? method || HttpMethodSpecs.GET : HttpMethodSpecs.ALL
-    const handlerName =
-      name || camelCase(`${methodToMatch}_${(pathname || 'all').replaceAll('/', '_')}_handler`)
+    const handlerName = name || `${routeToString(methodToMatch, pathname)}Handler`
     this.logger.info(`Register '${handlerName}' on route '${methodToMatch} ${pathname || '*'}'`)
     const routeHandler: RequestHandler = this.#buildRouteHandler({
       handler,

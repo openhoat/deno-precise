@@ -1,8 +1,9 @@
 import type { Logger } from '../../../../deps/x/optic.ts'
-import type { Routerable } from './router.d.ts'
 import type {
   ErrorHandler,
+  MethodRegisterable,
   NotFoundHandler,
+  Registerable,
   RequestHandler,
   RequestHandlerSpec,
   ResponseHook,
@@ -23,13 +24,13 @@ export interface StaticWebServerable {
 
 export type WebServerStartOptions = Partial<{ syncServe: boolean }>
 
-export interface WebServerable {
+export interface WebServerable
+  extends Registerable<WebServerable>,
+    MethodRegisterable<WebServerable> {
   readonly hostname: string | undefined
   readonly logger: Readonly<Logger>
   readonly port: number | undefined
   readonly started: boolean
-
-  register(requestHandlerSpec: RequestHandlerSpec | Routerable): WebServerable
 
   setBeforeResponse(middleware: ResponseHook): void
 

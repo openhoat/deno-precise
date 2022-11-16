@@ -1,4 +1,5 @@
-import { RequestHandler, RequestHandlerSpec } from '../types/web/utils.d.ts'
+import type { HttpMethodSpec, RequestHandler, RequestHandlerSpec } from '../types/web/utils.d.ts'
+import { camelCase } from '../../../deps/x/camelcase.ts'
 
 export enum HttpMethods {
   DELETE = 'DELETE',
@@ -43,3 +44,6 @@ export const toRequestHandlerSpecs = (
   }
   return [handlers]
 }
+
+export const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
+  camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
