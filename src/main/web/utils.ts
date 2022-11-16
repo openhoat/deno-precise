@@ -33,6 +33,9 @@ export const hostnameForDisplay = (hostname?: string): string => {
   return !hostname || hostname === '0.0.0.0' ? 'localhost' : hostname
 }
 
+export const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
+  camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
+
 export const toRequestHandlerSpecs = (
   handlers: RequestHandlerSpec[] | RequestHandlerSpec | RequestHandler,
 ): RequestHandlerSpec[] => {
@@ -44,6 +47,3 @@ export const toRequestHandlerSpecs = (
   }
   return [handlers]
 }
-
-export const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
-  camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
