@@ -1,6 +1,3 @@
-env:
-  PORT: 8999
-
 scripts:
   clean:
     desc: Clean the dist folder
@@ -10,6 +7,8 @@ scripts:
     cmd:
       - vr test --coverage=dist/coverage
       - deno coverage --include=src/main --lcov dist/coverage --output=dist/coverage/lcov.info
+    env:
+      PORT: 8999
   cover:
     desc: Run the tests coverage and build the HTML report
     cmd:
@@ -91,6 +90,8 @@ scripts:
       - net
       - read
       - env
+    env:
+      PORT: 8999
   'test:watch':
     desc: Run the tests in watch mode
     cmd: deno test ./src/test
@@ -99,6 +100,8 @@ scripts:
       - read
       - env
     watch: true
+    env:
+      PORT: 8999
   validate:
     desc: Validate the project
     cmd:
