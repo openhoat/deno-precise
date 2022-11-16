@@ -122,6 +122,7 @@ scripts:
           - vr lint:watch
           - vr format:check:watch
           - vr test:watch
-  'version.ts:update':
-    desc: Update version.ts with the latest Git tag
-    cmd: sed -i "1s/.*/const version = '$(git describe --tags --abbrev=0)'/" version.ts
+  'version:update':
+    desc: Update version.json with the latest Git tag
+    cmd:
+      - echo "\"$(git describe --tags --abbrev=0)\"" > version.json
