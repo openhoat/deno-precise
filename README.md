@@ -139,6 +139,12 @@ Server logs:
 38:225 [Debug   ] Request 'GET /' matches route 'GET /': apply 'handler'
 ```
 
+> There are several ways to register a route to the web server instance:
+>
+> - `register()` method
+> - `get|post|put|…` alias method
+> - `handlers` option of the constructor
+
 ## Why
 
 This project has been created because of the lack of a stop method in Http Deno and the others third party modules.
