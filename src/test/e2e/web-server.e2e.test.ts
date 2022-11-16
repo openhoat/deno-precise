@@ -22,11 +22,8 @@ Deno.test('API server e2e tests', async (t) => {
         const testRoutePath = '/test'
         const testResponseBody = { ok: true }
         webServer.setBeforeResponse(exposeVersion)
-        webServer.register({
-          path: testRoutePath,
-          handler: function testHandler() {
-            return Response.json(testResponseBody)
-          },
+        webServer.get(testRoutePath, function testHandler() {
+          return Response.json(testResponseBody)
         })
         try {
           await webServer.start()
