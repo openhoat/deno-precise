@@ -1,5 +1,5 @@
 name: install
-description: Install specific versions of NodeJS and NPM
+description: Install specific version of Deno, Velociraptor, and NPX
 
 inputs:
   deno-version:
