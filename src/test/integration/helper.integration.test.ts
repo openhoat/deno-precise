@@ -1,113 +1,92 @@
-import { assert, assertEquals } from '../../../dev_deps/std.ts'
 import { asPromise, fileExtension, isBodyInit, toNumber, toResponse } from '../../main/helper.ts'
-import { description, eachAsync } from '../utils.ts'
+import { eachAsync } from '../utils.ts'
+import { describe, expect, test } from '../../../dev_deps/x/stej.ts'
 
-Deno.test('helper integration tests', async (t) => {
-  await t.step('asPromise', async (t) => {
-    await t.step(
-      description(
-        {
-          given: 'a promise',
-          should: 'return the given promise',
-        },
-        2,
-      ),
+describe('helper integration tests', async () => {
+  await describe('asPromise', async () => {
+    await test(
+      {
+        given: 'a promise',
+        should: 'return the given promise',
+      },
       () => {
         const p = Promise.resolve('foo')
         const result = asPromise(p)
-        assertEquals(result, p)
+        expect(result).toBe(p)
       },
     )
-    await t.step(
-      description(
-        {
-          given: 'a value',
-          should: 'return a Promise that will resolve to the given value',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: 'a value',
+        should: 'return a Promise that will resolve to the given value',
+      },
       async () => {
         const value = 'foo'
-        const result = asPromise(value)
-        assertEquals(await result, value)
+        const result = await asPromise(value)
+        expect(result).toBe(value)
       },
     )
   })
-  await t.step('fileExtension', async (t) => {
-    await t.step(
-      description(
-        {
-          given: 'foo.txt',
-          should: 'return txt',
-        },
-        2,
-      ),
+  await describe('fileExtension', async () => {
+    await test(
+      {
+        given: 'foo.txt',
+        should: 'return txt',
+      },
       () => {
         const filename = 'foo.txt'
         const result = fileExtension(filename)
-        assert(result === 'txt')
+        expect(result).toEqual('txt')
       },
     )
   })
-  await t.step('isBodyInit', async (t) => {
-    await t.step(
-      description(
-        {
-          given: 'a string',
-          should: 'return true',
-        },
-        2,
-      ),
+  await describe('isBodyInit', async () => {
+    await test(
+      {
+        given: 'a string',
+        should: 'return true',
+      },
       () => {
         const value = 'any content string'
         const result = isBodyInit(value)
-        assert(result === true)
+        expect(result).toEqual(true)
       },
     )
-    await t.step(
-      description(
-        {
-          given: 'a blob',
-          should: 'return true',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: 'a blob',
+        should: 'return true',
+      },
       () => {
         const value = new Blob()
         const result = isBodyInit(value)
-        assert(result === true)
+        expect(result).toEqual(true)
       },
     )
-    await t.step(
-      description(
-        {
-          given: 'an array buffer',
-          should: 'return true',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: 'an array buffer',
+        should: 'return true',
+      },
       () => {
         const value = new ArrayBuffer(0)
         const result = isBodyInit(value)
-        assert(result === true)
+        expect(result).toEqual(true)
       },
     )
-    await t.step(
-      description(
-        {
-          given: "{ foo: 'bar' }",
-          should: 'return false',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: "{ foo: 'bar' }",
+        should: 'return false',
+      },
       () => {
         const value = { foo: 'bar' }
         const result = isBodyInit(value)
-        assert(result === false)
+        expect(result).toEqual(false)
       },
     )
   })
-  await t.step('toNumber', async (t) => {
+  await describe('toNumber', async () => {
     const testCases = [
       { given: '123', expectedResult: 123 },
       { given: 'abcde', expectedResult: undefined },
@@ -116,62 +95,50 @@ Deno.test('helper integration tests', async (t) => {
       { given: '123.678 ', expectedResult: 123.678 },
     ]
     await eachAsync(testCases, async ({ given, expectedResult }) => {
-      await t.step(
-        description(
-          {
-            given: `${given} (type ${typeof given})`,
-            should: `return ${expectedResult}`,
-          },
-          2,
-        ),
+      await test(
+        {
+          given: `${given} (type ${typeof given})`,
+          should: `return ${expectedResult}`,
+        },
         () => {
           const result = toNumber(given)
-          assertEquals(result, expectedResult)
+          expect(result).toEqual(expectedResult)
         },
       )
     })
   })
-  await t.step('toResponse', async (t) => {
-    await t.step(
-      description(
-        {
-          given: 'a response',
-          should: 'return the given response',
-        },
-        2,
-      ),
+  await describe('toResponse', async () => {
+    await test(
+      {
+        given: 'a response',
+        should: 'return the given response',
+      },
       () => {
         const value = new Response('foo')
         const result = toResponse(value)
-        assert(result === value)
+        expect(result).toEqual(value)
       },
     )
-    await t.step(
-      description(
-        {
-          given: 'a body',
-          should: 'return the given response',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: 'a body',
+        should: 'return the given response',
+      },
       () => {
         const value = 'foo'
         const result = toResponse(value)
-        assert(result instanceof Response)
+        expect(result).toBeInstanceOf(Response)
       },
     )
-    await t.step(
-      description(
-        {
-          given: 'a literal object',
-          should: 'return a response',
-        },
-        2,
-      ),
+    await test(
+      {
+        given: 'a literal object',
+        should: 'return a response',
+      },
       () => {
         const value = { foo: 'bar' }
         const result = toResponse(value)
-        assert(result instanceof Response)
+        expect(result).toBeInstanceOf(Response)
       },
     )
   })
