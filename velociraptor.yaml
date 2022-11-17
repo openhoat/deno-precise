@@ -85,7 +85,7 @@ scripts:
         docker run --rm
         -e SONAR_HOST_URL
         -e SONAR_LOGIN
-        -e SONAR_SCANNER_OPTS="-Dsonar.projectBaseDir=${PWD} -Dsonar.projectVersion=$(echo "import version from './version.ts';console.log(version)" | deno run -)"
+        -e SONAR_SCANNER_OPTS="-Dsonar.projectBaseDir=${PWD} -Dsonar.projectVersion=$(echo "import version from './version.json' assert { type: 'json' };console.log(version)" | deno run - )"
         -v "${PWD}:${PWD}"
         sonarsource/sonar-scanner-cli
   test:
