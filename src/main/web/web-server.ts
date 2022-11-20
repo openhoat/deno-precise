@@ -14,8 +14,12 @@ import type {
   ResolvedRequestHandlerResult,
 } from '../types/web/utils.d.ts'
 import { RequestHandlerContext } from '../types/web/utils.d.ts'
-import type { StaticWebServerable, WebServerable, WebServerOptions } from '../types/web/server.d.ts'
-import { WebServerStartOptions } from '../types/web/server.d.ts'
+import type {
+  StaticWebServerable,
+  WebServerable,
+  WebServerOptions,
+} from '../types/web/web-server.d.ts'
+import { WebServerStartOptions } from '../types/web/web-server.d.ts'
 import {
   asPromise,
   isDefinedObject,
@@ -237,9 +241,7 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
       const finalResponse = hookResponse || response
       return toResponse(finalResponse)
     }
-    const server = new Server({
-      handler,
-    })
+    const server = new Server({ handler })
     this.#server = server
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
