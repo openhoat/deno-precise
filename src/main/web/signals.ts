@@ -1,4 +1,4 @@
-import type { WebServerable } from '../types/web/server.d.ts'
+import type { WebServerable } from '../types/web/web-server.d.ts'
 
 const shutdownOnSignals = (
   webServer: WebServerable,

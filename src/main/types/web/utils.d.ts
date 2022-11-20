@@ -1,5 +1,5 @@
 import type { ConnInfo } from '../../../../deps/std.ts'
-import { WebServerable } from './server.d.ts'
+import { WebServerable } from './web-server.d.ts'
 import { Routerable } from './router.d.ts'
 
 export type ErrorHandler = (

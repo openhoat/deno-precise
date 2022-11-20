@@ -1,4 +1,4 @@
-import type { WebServerable } from './server.d.ts'
+import type { WebServerable } from './web-server.d.ts'
 import type { MethodRegisterable, Registerable } from './utils.d.ts'
 
 export type RouterOptions = Partial<{

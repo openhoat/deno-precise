@@ -1,5 +1,5 @@
 import type { Routerable, RouterOptions } from '../types/web/router.d.ts'
-import type { WebServerable } from '../types/web/server.d.ts'
+import type { WebServerable } from '../types/web/web-server.d.ts'
 import type { RequestHandlerSpec } from '../types/web/utils.d.ts'
 import { MethodRegisterer } from './method-registerer.ts'
 
