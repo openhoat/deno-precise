@@ -11,7 +11,7 @@ describe('API server e2e tests', () => {
       })
       const testRoutePath = '/test'
       const testResponseBody = { ok: true }
-      webServer.setBeforeResponse(exposeVersion)
+      webServer.setOnSendHook(exposeVersion())
       webServer.get(testRoutePath, function testHandler() {
         return Response.json(testResponseBody)
       })

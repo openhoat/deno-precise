@@ -3,10 +3,10 @@ import type {
   ErrorHandler,
   MethodRegisterable,
   NotFoundHandler,
+  OnSendHookHandler,
   Registerable,
   RequestHandler,
   RequestHandlerSpec,
-  ResponseHook,
 } from './utils.d.ts'
 
 export type WebServerOptions = Partial<{
@@ -32,11 +32,11 @@ export interface WebServerable
   readonly port: number | undefined
   readonly started: boolean
 
-  setBeforeResponse(middleware: ResponseHook): void
-
   setErrorHandler(errorHandler: ErrorHandler): void
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
+
+  setOnSendHook(hookHandler: OnSendHookHandler): void
 
   start(options?: WebServerStartOptions): Promise<void>
 

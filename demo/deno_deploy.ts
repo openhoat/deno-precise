@@ -15,5 +15,5 @@ const webServer = new WebServer({
     assets({ root: assetsBaseDir }),
   ],
 })
-webServer.setBeforeResponse(exposeVersion)
+webServer.setOnSendHook(exposeVersion())
 await webServer.start()
