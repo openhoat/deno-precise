@@ -611,7 +611,7 @@ Precise provides hooks to apply side effects or to change the response.
 import { exposeVersion, WebServer } from 'https://deno.land/std@0.162.0/path/mod.ts'
 
 const webServer = new WebServer()
-webServer.setBeforeResponse(exposeVersion)
+webServer.setOnSendHook(exposeVersion())
 webServer.register({
   path: '/',
   handler: () => ({ foo: 'bar' }),
@@ -621,6 +621,8 @@ await webServer.start()
 
 > In this example, we use a provided 'exposeVersion' middleware to change the response headers juste before sending
 > response to the client. Feel free to use your own…
+>
+> By default `exposeVersion` use `name` and `version` of Precise.
 
 ```shell
 $ http :8000/

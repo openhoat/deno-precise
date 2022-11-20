@@ -7,10 +7,10 @@ import type {
   HttpMethodSpec,
   NamedRouteHandler,
   NotFoundHandler,
+  OnSendHookHandler,
   RequestHandler,
   RequestHandlerResult,
   RequestHandlerSpec,
-  RequestWithRouteParams,
   ResolvedRequestHandlerResult,
 } from '../types/web/utils.d.ts'
 import { RequestHandlerContext } from '../types/web/utils.d.ts'
@@ -36,14 +36,10 @@ import { MethodRegisterer } from './method-registerer.ts'
 
 @staticImplements<StaticWebServerable>()
 class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
-  #beforeResponseHook?: (
-    response: Response,
-    req: RequestWithRouteParams,
-    connInfo: ConnInfo,
-  ) => RequestHandlerResult
   #binded?: Deno.NetAddr
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
+  #onSendHookHandler?: OnSendHookHandler
   readonly #options?: WebServerOptions
   #routeHandlers?: NamedRouteHandler[]
   readonly #requestHandlerSpecs: RequestHandlerSpec[] = []
@@ -203,17 +199,6 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     return this
   }
 
-  setBeforeResponse(
-    middleware: (
-      response: Response,
-      req: RequestWithRouteParams,
-      connInfo: ConnInfo,
-    ) => RequestHandlerResult,
-  ) {
-    this.logger.debug(`Set before response middleware (name: ${middleware.name})`)
-    this.#beforeResponseHook = middleware
-  }
-
   setErrorHandler(errorHandler: ErrorHandler) {
     this.logger.debug(`Set error handler (name: ${errorHandler.name})`)
     this.#errorHandler = errorHandler
@@ -222,6 +207,11 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   setNotFoundHandler(notFoundHandler: NotFoundHandler) {
     this.logger.debug(`Set not found handler (name: ${notFoundHandler.name})`)
     this.#notFoundHandler = notFoundHandler
+  }
+
+  setOnSendHook(hookHandler: OnSendHookHandler) {
+    this.logger.debug(`Set 'onSend' hook (name: ${hookHandler.name})`)
+    this.#onSendHookHandler = hookHandler
   }
 
   async start(options?: WebServerStartOptions) {
@@ -241,9 +231,9 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     this.#prepareRouteHandlers()
     const handler: Handler = async (req, connInfo): Promise<Response> => {
       const response = toResponse(await this.#handleRequest(req, connInfo))
-      const beforeResponseHook = this.#beforeResponseHook
+      const onSendHookHandler = this.#onSendHookHandler
       const hookResponse =
-        beforeResponseHook && (await asPromise(beforeResponseHook(response, req, connInfo)))
+        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
       const finalResponse = hookResponse || response
       return toResponse(finalResponse)
     }

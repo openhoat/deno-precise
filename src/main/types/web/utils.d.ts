@@ -55,6 +55,12 @@ export type NotFoundHandler = (
   context: RequestHandlerContext,
 ) => RequestHandlerResult
 
+export type OnSendHookHandler = (
+  response: Response,
+  req: RequestWithRouteParams,
+  connInfo: ConnInfo,
+) => RequestHandlerResult
+
 export interface Registerable<T> {
   register(requestHandlerSpec: RequestHandlerSpec | Routerable): T
 }
@@ -86,12 +92,6 @@ export interface RequestWithRouteParams extends Request {
 }
 
 export type ResolvedRequestHandlerResult = Response | BodyInit | unknown | void
-
-export type ResponseHook = (
-  response: Response,
-  req: RequestWithRouteParams,
-  connInfo: ConnInfo,
-) => RequestHandlerResult
 
 export type RouteHandler = (
   req: RequestWithRouteParams,

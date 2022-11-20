@@ -1,7 +1,7 @@
 import { exposeVersion, WebServer } from '../mod.ts'
 
 const webServer = new WebServer()
-webServer.setBeforeResponse(exposeVersion)
+webServer.setOnSendHook(exposeVersion())
 webServer.register({
   path: '/',
   handler: () => ({ foo: 'bar' }),
