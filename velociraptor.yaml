@@ -2,6 +2,9 @@ scripts:
   clean:
     desc: Clean the dist folder
     cmd: npx rimraf dist
+  'clean:coverage':
+    desc: Clean the dist/coverage folder
+    cmd: npx rimraf dist/coverage
   'cover:lcov':
     desc: Run the tests coverage
     cmd:
@@ -12,6 +15,7 @@ scripts:
   cover:
     desc: Run the tests coverage and build the HTML report
     cmd:
+      - vr clean:coverage
       - vr cover:lcov
       - genhtml -o dist/coverage/html dist/coverage/lcov.info
   'cover:open':
