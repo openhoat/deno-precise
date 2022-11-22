@@ -7,22 +7,24 @@ import {
   TokenReplacer,
 } from '../../../deps/x/optic.ts'
 import type { WebServerDefaults } from '../types/web/defaults.d.ts'
+import { BuildLogger } from '../types/web/defaults.d.ts'
 import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
 
-const buildLogger = () =>
-  Object.freeze(
-    new Logger()
-      .withMinLogLevel(Level.Debug)
-      .addStream(
-        new ConsoleStream().withFormat(
-          new TokenReplacer()
-            .withFormat('{dateTime} [{level}] {msg}')
-            .withDateTimeFormat('ss:SSS')
-            .withLevelPadding(longestLevelName())
-            .withColor(),
-        ),
-      ),
+const tokenReplacer = Object.freeze(
+  new TokenReplacer()
+    .withFormat('{dateTime} [{level}] {msg}')
+    .withDateTimeFormat('ss:SSS')
+    .withLevelPadding(longestLevelName())
+    .withColor(),
+)
+
+const consoleStream = Object.freeze(new ConsoleStream().withFormat(tokenReplacer))
+
+const buildLogger: BuildLogger = () => {
+  return Object.freeze(
+    new Logger('Precise').withMinLogLevel(Level.Debug).addStream(_internals.consoleStream),
   )
+}
 
 const errorHandler: ErrorHandler = (req, err, context) => {
   if (context.result) {
@@ -96,9 +98,15 @@ const notFoundHtmlTemplateContent = `
 
 const defaults: Readonly<WebServerDefaults> = Object.freeze({
   buildLogger,
+  consoleStream,
   errorHandler,
   notFoundHandler,
   port: 8000,
+  tokenReplacer,
 })
 
-export { defaults }
+const _internals = {
+  consoleStream,
+}
+
+export { _internals, defaults }
