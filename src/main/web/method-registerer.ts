@@ -2,7 +2,7 @@ import type { Registerable, RequestHandler, RequestHandlerSpec } from '../types/
 import type { Routerable } from '../types/web/router.d.ts'
 import { HttpMethodSpecs } from './utils.ts'
 
-abstract class MethodRegisterer<T extends Registerable<T>> implements Registerable<T> {
+abstract class MethodRegisterer<T> implements Registerable<T> {
   all(path: string, handler: RequestHandler) {
     this.register({ handler, method: HttpMethodSpecs.ALL, path })
     return this

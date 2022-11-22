@@ -22,7 +22,7 @@ export type HttpMethod =
 
 export type HttpMethodSpec = HttpMethod | 'ALL'
 
-export interface MethodRegisterable<T extends Registerable<T>> {
+export interface MethodRegisterable<T> {
   all(path: string, handler: RequestHandler): T
 
   delete(path: string, handler: RequestHandler): T
