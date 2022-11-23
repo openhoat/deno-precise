@@ -23,21 +23,22 @@ describe('web method registerer unit tests', () => {
       const usecases: {
         name: keyof MethodRegisterable<void>
         method: HttpMethodSpecs
+        path: string
       }[] = [
-        { name: 'all', method: HttpMethodSpecs.ALL },
-        { name: 'delete', method: HttpMethodSpecs.DELETE },
-        { name: 'get', method: HttpMethodSpecs.GET },
-        { name: 'head', method: HttpMethodSpecs.HEAD },
-        { name: 'options', method: HttpMethodSpecs.OPTIONS },
-        { name: 'patch', method: HttpMethodSpecs.PATCH },
-        { name: 'post', method: HttpMethodSpecs.POST },
-        { name: 'purge', method: HttpMethodSpecs.PURGE },
-        { name: 'put', method: HttpMethodSpecs.PUT },
-        { name: 'trace', method: HttpMethodSpecs.TRACE },
+        { name: 'all', method: HttpMethodSpecs.ALL, path: '/foo' },
+        { name: 'delete', method: HttpMethodSpecs.DELETE, path: '/hello' },
+        { name: 'get', method: HttpMethodSpecs.GET, path: '/foo/bar' },
+        { name: 'head', method: HttpMethodSpecs.HEAD, path: '/foo/hello' },
+        { name: 'options', method: HttpMethodSpecs.OPTIONS, path: '/foo/world' },
+        { name: 'patch', method: HttpMethodSpecs.PATCH, path: '/hello' },
+        { name: 'post', method: HttpMethodSpecs.POST, path: '/hello/world' },
+        { name: 'purge', method: HttpMethodSpecs.PURGE, path: '/hello/world/bar' },
+        { name: 'put', method: HttpMethodSpecs.PUT, path: '/world' },
+        { name: 'trace', method: HttpMethodSpecs.TRACE, path: '/world/foo' },
       ]
-      usecases.forEach(({ name, method }, index) => {
+      usecases.forEach(({ name, path, method }, index) => {
         describe(name, () => {
-          it('should call register method with a request handler spec given a path and a request handler', () => {
+          it(`should call register, given path '${path}', method '${method}' and a request handler`, () => {
             // Given
             const registerer = new TestMethodRegisterer()
             const fooHandler: RequestHandler = () => {}
