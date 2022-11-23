@@ -1,32 +1,80 @@
 import { Level, Logger } from '../../main/deps/x/optic.ts'
-import { exposeVersion, version, WebServer } from '../../../mod.ts'
-import { describe, expect, it, run } from '../deps/x/tincan.ts'
+import {
+  assets,
+  exposeVersion,
+  RequestHandlerSpec,
+  version,
+  WebServer,
+  WebServerable,
+} from '../../../mod.ts'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, run } from '../deps/x/tincan.ts'
+import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+
+const __dirname = dirname(fromFileUrl(import.meta.url))
+const assetsBaseDir = resolve(__dirname, 'assets')
 
 describe('API server e2e tests', () => {
   const logger = new Logger('test').withMinLogLevel(Level.Critical)
   describe('GET /test', () => {
-    it('should start, handle the request, respond a simple JSON, then stop, given a web server initialized with a simple test request handler', async () => {
-      const webServer = new WebServer({
+    type UseCase = RequestHandlerSpec & {
+      requestPath?: string
+      expectedStatusCode?: number
+      expectedBody?: unknown
+      type: 'json' | 'text'
+    }
+    const usecases: UseCase[] = [
+      {
+        path: '/json',
+        type: 'json',
+        handler: () => ({ foo: 'bar' }),
+        expectedBody: { foo: 'bar' },
+      },
+      {
+        path: '/text',
+        type: 'text',
+        handler: () => 'foo',
+        expectedBody: 'foo',
+      },
+      {
+        ...assets({ root: assetsBaseDir }),
+        requestPath: '/assets/hello.txt',
+        type: 'text',
+        expectedBody: 'World!',
+      },
+    ]
+    const handlers: RequestHandlerSpec[] = usecases.map(({ method, path, handler }) => ({
+      method,
+      path,
+      handler,
+    }))
+    let webServer: WebServerable
+    beforeAll(() => {
+      webServer = new WebServer({
+        handlers,
         logger,
       })
-      const testRoutePath = '/test'
-      const testResponseBody = { ok: true }
       webServer.setOnSendHook(exposeVersion())
-      webServer.get(testRoutePath, function testHandler() {
-        return Response.json(testResponseBody)
-      })
-      try {
-        await webServer.start()
-        const response = await fetch(`http://localhost:${webServer.port}${testRoutePath}`)
-        const jsonData = await response.json()
-        expect(jsonData).toEqual(testResponseBody)
-        const versionHeader = response.headers.get('X-Powered-By')
-        expect(versionHeader).toEqual(`Precise/${version}`)
-      } finally {
-        if (webServer.started) {
-          await webServer.stop()
-        }
+    })
+    beforeEach(async () => {
+      await webServer.start()
+    })
+    afterEach(async () => {
+      if (webServer?.started) {
+        await webServer.stop()
       }
+    })
+    usecases.forEach(({ expectedStatusCode, expectedBody, method, path, requestPath, type }) => {
+      const expectedBodyString = type === 'json' ? JSON.stringify(expectedBody) : expectedBody
+      it(`should respond '${expectedBodyString}', given a '${method || 'GET'} ${
+        requestPath || path
+      }' request`, async () => {
+        const url = `http://localhost:${webServer.port}${requestPath || path}`
+        const response = await fetch(url, { method })
+        expect(response.status).toEqual(expectedStatusCode || 200)
+        expect(response.headers.get('X-Powered-By')).toEqual(`Precise/${version}`)
+        const result = type === 'json' ? await response.json() : await response.text()
+        expect(result).toEqual(expectedBody)
+      })
     })
   })
 })
