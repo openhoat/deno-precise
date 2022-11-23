@@ -11,8 +11,12 @@ type AssetsHandlerOptions = {
 
 const assets: (options: AssetsHandlerOptions) => RequestHandlerSpec = (options) => {
   const { prefix = '/assets', root } = options
+  const handler = _internals.buildHandler(root, prefix)
+  return { name: 'assetsHandler', handler, path: `${prefix}/:path` }
+}
 
-  async function handler(this: WebServerable, req: RequestWithRouteParams) {
+const buildHandler = (root: AssetsHandlerOptions['root'], prefix: string) =>
+  async function (this: WebServerable, req: RequestWithRouteParams) {
     if (typeof req.params?.path !== 'string') {
       return
     }
@@ -33,8 +37,9 @@ const assets: (options: AssetsHandlerOptions) => RequestHandlerSpec = (options) 
     }
   }
 
-  return { name: 'assetsHandler', handler, path: `${prefix}/:path` }
+const _internals = {
+  buildHandler,
 }
 
 export type { AssetsHandlerOptions }
-export { assets }
+export { _internals, assets }
