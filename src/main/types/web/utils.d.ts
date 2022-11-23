@@ -1,4 +1,4 @@
-import type { ConnInfo } from '../../../../deps/std.ts'
+import type { ConnInfo } from '../../deps/std.ts'
 import { WebServerable } from './web-server.d.ts'
 import { Routerable } from './router.d.ts'
 

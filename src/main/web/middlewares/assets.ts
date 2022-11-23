@@ -1,5 +1,5 @@
-import { join } from '../../../../deps/std.ts'
-import { mime } from '../../../../deps/x/mimetypes.ts'
+import { join } from '../../deps/std.ts'
+import { mime } from '../../deps/x/mimetypes.ts'
 import type { WebServerable } from '../../types/web/web-server.d.ts'
 import type { RequestHandlerSpec, RequestWithRouteParams } from '../../types/web/utils.d.ts'
 import { fileExtension } from '../../helper.ts'

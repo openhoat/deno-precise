@@ -1,7 +1,7 @@
 import type { StubLogger } from './types/utils.d.ts'
-import type { Stub } from '../../dev_deps/std.ts'
-import { setImmediate, stub } from '../../dev_deps/std.ts'
-import { ConsoleStream, Logger } from '../../deps/x/optic.ts'
+import type { Stub } from './deps/std.ts'
+import { setImmediate, stub } from './deps/std.ts'
+import { ConsoleStream, Logger } from '../main/deps/x/optic.ts'
 
 export type AsyncIterator<T, U> = (item: T, index: number, ar: T[]) => Promise<U>
 

@@ -1,4 +1,4 @@
-import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import { dirname, fromFileUrl, resolve } from './deps/std.ts'
 import { assets, WebServer } from '../mod.ts'
 
 const __dirname = dirname(fromFileUrl(import.meta.url))

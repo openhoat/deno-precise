@@ -4,7 +4,7 @@ import {
   longestLevelName,
   nameToLevel,
   TokenReplacer,
-} from '../deps/x/optic.ts'
+} from './deps/x/optic.ts'
 
 const logLevel = nameToLevel(Deno.env.get('LOG_LEVEL') ?? 'Debug')
 const levelPadding = longestLevelName()

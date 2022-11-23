@@ -1,13 +1,7 @@
 import type { BuildLogger, WebServerDefaults } from '../types/web/defaults.d.ts'
 import type { ErrorHandler, NotFoundHandler } from '../types/web/utils.d.ts'
-import { Accepts } from '../../../deps/x/accepts.ts'
-import {
-  ConsoleStream,
-  Level,
-  Logger,
-  longestLevelName,
-  TokenReplacer,
-} from '../../../deps/x/optic.ts'
+import { Accepts } from '../deps/x/accepts.ts'
+import { ConsoleStream, Level, Logger, longestLevelName, TokenReplacer } from '../deps/x/optic.ts'
 
 const buildLogger: BuildLogger = () => {
   const { buildConsoleStream } = _internals

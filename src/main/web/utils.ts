@@ -1,5 +1,5 @@
 import type { HttpMethodSpec, RequestHandler, RequestHandlerSpec } from '../types/web/utils.d.ts'
-import { camelCase } from '../../../deps/x/camelcase.ts'
+import { camelCase } from '../deps/x/camelcase.ts'
 
 export enum HttpMethods {
   DELETE = 'DELETE',

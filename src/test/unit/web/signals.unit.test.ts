@@ -1,7 +1,7 @@
 import type { WebServerable } from '../../../main/types/web/web-server.d.ts'
 import type { LoggerStub } from '../../types/utils.d.ts'
-import { assertSpyCalls, Spy, spy } from '../../../../dev_deps/std.ts'
-import { afterAll, beforeAll, describe, it, run } from '../../../../dev_deps/x/tincan.ts'
+import { assertSpyCalls, Spy, spy } from '../../deps/std.ts'
+import { afterAll, beforeAll, describe, it, run } from '../../deps/x/tincan.ts'
 import { _internals, shutdownOnSignals } from '../../../main/web/signals.ts'
 import { doNextTick, memberReplacer, stubLogger } from '../../utils.ts'
 

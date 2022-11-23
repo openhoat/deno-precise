@@ -1,5 +1,5 @@
-import type { Spy } from '../../../../dev_deps/std.ts'
-import { assertSpyCall, stub } from '../../../../dev_deps/std.ts'
+import type { Spy } from '../../deps/std.ts'
+import { assertSpyCall, stub } from '../../deps/std.ts'
 import type { LoggerStub } from '../../types/utils.d.ts'
 import type {
   RequestHandlerContext,
@@ -7,8 +7,8 @@ import type {
 } from '../../../main/types/web/utils.d.ts'
 import { RequestHandlerResult } from '../../../main/types/web/utils.d.ts'
 import type { WebServerable } from '../../../main/types/web/web-server.d.ts'
-import { ConsoleStream, Logger } from '../../../../deps/x/optic.ts'
-import { afterAll, beforeAll, describe, expect, it, run } from '../../../../dev_deps/x/tincan.ts'
+import { ConsoleStream, Logger } from '../../../main/deps/x/optic.ts'
+import { afterAll, beforeAll, describe, expect, it, run } from '../../deps/x/tincan.ts'
 import { _internals, defaults } from '../../../main/web/defaults.ts'
 import { memberReplacer, noop, stubLogger } from '../../utils.ts'
 

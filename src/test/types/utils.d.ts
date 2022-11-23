@@ -1,5 +1,5 @@
-import type { Stub } from '../../../dev_deps/std.ts'
-import type { Logger } from '../../../deps/x/optic.ts'
+import type { Stub } from '../deps/std.ts'
+import type { Logger } from '../../main/deps/x/optic.ts'
 
 export type LoggerStub = {
   logger: Logger

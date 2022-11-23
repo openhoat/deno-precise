@@ -1,6 +1,6 @@
-import { Level, Logger } from '../../../deps/x/optic.ts'
+import { Level, Logger } from '../../main/deps/x/optic.ts'
 import { exposeVersion, version, WebServer } from '../../../mod.ts'
-import { describe, expect, it, run } from '../../../dev_deps/x/tincan.ts'
+import { describe, expect, it, run } from '../deps/x/tincan.ts'
 
 describe('API server e2e tests', () => {
   const logger = new Logger('test').withMinLogLevel(Level.Critical)

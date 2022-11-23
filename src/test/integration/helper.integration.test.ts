@@ -1,5 +1,5 @@
 import { asPromise, fileExtension, isBodyInit, toNumber, toResponse } from '../../main/helper.ts'
-import { describe, expect, it, run } from '../../../dev_deps/x/tincan.ts'
+import { describe, expect, it, run } from '../deps/x/tincan.ts'
 
 describe('helper integration tests', () => {
   describe('asPromise', () => {
