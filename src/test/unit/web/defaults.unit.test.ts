@@ -4,9 +4,8 @@ import type { LoggerStub } from '../../types/utils.d.ts'
 import type {
   RequestHandlerContext,
   RequestWithRouteParams,
-} from '../../../main/types/web/utils.d.ts'
-import { RequestHandlerResult } from '../../../main/types/web/utils.d.ts'
-import type { WebServerable } from '../../../main/types/web/web-server.d.ts'
+} from '../../../main/types/web/web-server.d.ts'
+import type { RequestHandlerResult, WebServerable } from '../../../main/types/web/web-server.d.ts'
 import { ConsoleStream, Logger } from '../../../main/deps/x/optic.ts'
 import { afterAll, beforeAll, describe, expect, it, run } from '../../deps/x/tincan.ts'
 import { _internals, defaults } from '../../../main/web/defaults.ts'

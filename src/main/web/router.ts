@@ -1,6 +1,5 @@
 import type { Routerable, RouterOptions } from '../types/web/router.d.ts'
-import type { WebServerable } from '../types/web/web-server.d.ts'
-import type { RequestHandlerSpec } from '../types/web/utils.d.ts'
+import type { Middleware, RequestHandlerSpec, WebServerable } from '../types/web/web-server.d.ts'
 import { MethodRegisterer } from './method-registerer.ts'
 
 const isRouter = (o: unknown): o is Routerable => o instanceof Router
@@ -15,11 +14,11 @@ class Router extends MethodRegisterer<Routerable> implements Routerable {
     this.prefix = options?.prefix ?? ''
   }
 
-  register(requestHandlerOrRouter: RequestHandlerSpec | Routerable): Routerable {
-    if (isRouter(requestHandlerOrRouter)) {
-      this.#routers.push(requestHandlerOrRouter)
+  register(middleware: Middleware): Routerable {
+    if (isRouter(middleware)) {
+      this.#routers.push(middleware)
     } else {
-      this.#requestHandlerSpecs.push(requestHandlerOrRouter)
+      this.#requestHandlerSpecs.push(middleware)
     }
     return this
   }

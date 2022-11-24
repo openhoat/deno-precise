@@ -31,6 +31,9 @@ export const staticImplements: StaticImplements =
   // eslint-disable-next-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
   (__: T) => {} // NOSONAR
 
+export const toArray = <T>(o: T | T[]): T[] =>
+  typeof o === 'object' && o && 'length' in o ? o : [o]
+
 export const toNumber = (s: unknown): number | undefined => {
   if (typeof s === 'undefined' || (typeof s === 'object' && !s)) {
     return undefined

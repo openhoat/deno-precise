@@ -2,7 +2,9 @@ import { Level, Logger } from '../../main/deps/x/optic.ts'
 import {
   assets,
   exposeVersion,
+  HttpMethodSpec,
   RequestHandlerSpec,
+  Routerable,
   version,
   WebServer,
   WebServerable,
@@ -16,7 +18,10 @@ const assetsBaseDir = resolve(__dirname, 'assets')
 describe('API server e2e tests', () => {
   const logger = new Logger('test').withMinLogLevel(Level.Critical)
   describe('GET /test', () => {
-    type UseCase = RequestHandlerSpec & {
+    type UseCase = {
+      middleware: RequestHandlerSpec | Routerable
+      method?: HttpMethodSpec
+      path: string
       requestPath?: string
       expectedStatusCode?: number
       expectedBody?: unknown
@@ -26,31 +31,30 @@ describe('API server e2e tests', () => {
       {
         path: '/json',
         type: 'json',
-        handler: () => ({ foo: 'bar' }),
         expectedBody: { foo: 'bar' },
+        middleware: { path: '/json', handler: () => ({ foo: 'bar' }) },
       },
       {
         path: '/text',
         type: 'text',
-        handler: () => 'foo',
         expectedBody: 'foo',
+        middleware: { path: '/text', handler: () => 'foo' },
       },
       {
-        ...assets({ root: assetsBaseDir }),
+        path: '/assets',
         requestPath: '/assets/hello.txt',
         type: 'text',
         expectedBody: 'World!',
+        middleware: assets({ root: assetsBaseDir }),
       },
     ]
-    const handlers: RequestHandlerSpec[] = usecases.map(({ method, path, handler }) => ({
-      method,
-      path,
-      handler,
-    }))
+    const middlewares: (RequestHandlerSpec | Routerable)[] = usecases.map(
+      (usecase) => usecase.middleware,
+    )
     let webServer: WebServerable
     beforeAll(() => {
       webServer = new WebServer({
-        handlers,
+        handlers: middlewares,
         logger,
       })
       webServer.setOnSendHook(exposeVersion())

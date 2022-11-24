@@ -1,20 +1,19 @@
 import type { ConnInfo, Handler } from '../deps/std.ts'
 import { Server } from '../deps/std.ts'
 import { Logger } from '../deps/x/optic.ts'
+import type { HttpMethodSpec } from '../types/web/http-method.d.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
   ErrorHandler,
-  HttpMethodSpec,
+  Middleware,
   NamedRouteHandler,
   NotFoundHandler,
   OnSendHookHandler,
+  RequestHandlerContext,
   RequestHandler,
   RequestHandlerResult,
   RequestHandlerSpec,
   ResolvedRequestHandlerResult,
-} from '../types/web/utils.d.ts'
-import { RequestHandlerContext } from '../types/web/utils.d.ts'
-import type {
   StaticWebServerable,
   WebServerable,
   WebServerOptions,
@@ -25,18 +24,15 @@ import {
   isDefinedObject,
   isNetAddr,
   staticImplements,
+  toArray,
   toNumber,
   toResponse,
 } from '../helper.ts'
 import { defaults } from './defaults.ts'
-import {
-  hostnameForDisplay,
-  HttpMethodSpecs,
-  routeToString,
-  toRequestHandlerSpecs,
-} from './utils.ts'
 import { isRouter } from './router.ts'
 import { MethodRegisterer } from './method-registerer.ts'
+import { HttpMethodSpecs } from './http-method.ts'
+import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
 
 @staticImplements<StaticWebServerable>()
 class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
@@ -64,8 +60,8 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
       this.setNotFoundHandler(options.notFoundHandler)
     }
     if (options?.handlers) {
-      toRequestHandlerSpecs(options.handlers).forEach((handler) => {
-        this.register(handler)
+      toArray(options.handlers).forEach((handler) => {
+        this.register(toMiddleware(handler))
       })
     }
   }
@@ -267,4 +263,21 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   }
 }
 
-export { WebServer }
+const hostnameForDisplay = (hostname?: string): string => {
+  // If the hostname is "0.0.0.0", we display "localhost" in console
+  // because browsers in Windows don't resolve "0.0.0.0".
+  // See the discussion in https://github.com/denoland/deno_std/issues/1165
+  return !hostname || hostname === '0.0.0.0' ? 'localhost' : hostname
+}
+
+const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
+  camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
+
+const toMiddleware = (handler: Middleware | RequestHandler): Middleware => {
+  if (typeof handler === 'function') {
+    return { handler }
+  }
+  return handler
+}
+
+export { WebServer, hostnameForDisplay, routeToString, toMiddleware }

@@ -1,13 +1,12 @@
-import type { HttpMethodSpec, RequestHandlerSpec } from '../../main/types/web/utils.d.ts'
-import { describe, expect, it, run } from '../deps/x/tincan.ts'
-import {
-  hostnameForDisplay,
-  HttpMethodSpecs,
-  routeToString,
-  toRequestHandlerSpecs,
-} from '../../main/web/utils.ts'
+import type { HttpMethodSpec } from '../../../main/types/web/http-method.d.ts'
+import type { Routerable } from '../../../main/types/web/router.d.ts'
+import type { RequestHandlerSpec } from '../../../main/types/web/web-server.d.ts'
+import { describe, expect, it, run } from '../../deps/x/tincan.ts'
+import { HttpMethodSpecs } from '../../../main/web/http-method.ts'
+import { hostnameForDisplay, routeToString, toMiddleware } from '../../../main/web/web-server.ts'
+import { Router } from '../../../main/web/router.ts'
 
-describe('utils integration tests', () => {
+describe('web server integration tests', () => {
   describe('hostnameForDisplay', () => {
     it('should return "foo.local.io" given "foo.local.io"', () => {
       // Given
@@ -52,32 +51,31 @@ describe('utils integration tests', () => {
       expect(result).toEqual('postAll')
     })
   })
-  describe('toRequestHandlerSpecs', () => {
-    it('should return a RequestHandlerSpec array given a function', () => {
+  describe('toMiddleware', () => {
+    it('should return a Middleware given a function', () => {
       // Given
       const handler = () => 'foo'
       // When
-      const result = toRequestHandlerSpecs(handler)
+      const result = toMiddleware(handler)
       // Then
-      expect(result).toEqual([{ handler }])
+      expect(result).toEqual({ handler })
     })
-    it('should return a RequestHandlerSpec array given a RequestHandlerSpec', () => {
+    it('should return a Middleware given a RequestHandlerSpec', () => {
       // Given
       const handler = () => 'foo'
       const requestHandlerSpec: RequestHandlerSpec = { handler }
       // When
-      const result = toRequestHandlerSpecs(requestHandlerSpec)
+      const result = toMiddleware(requestHandlerSpec)
       // Then
-      expect(result).toEqual([{ handler }])
+      expect(result).toEqual({ handler })
     })
-    it('should return the given RequestHandlerSpec array given a RequestHandlerSpec array', () => {
+    it('should return the given Middleware given a Routerable', () => {
       // Given
-      const handler = () => 'foo'
-      const requestHandlerSpec: RequestHandlerSpec[] = [{ handler }]
+      const router: Routerable = new Router()
       // When
-      const result = toRequestHandlerSpecs(requestHandlerSpec)
+      const result = toMiddleware(router)
       // Then
-      expect(result).toEqual([{ handler }])
+      expect(result).toEqual(router)
     })
   })
 })

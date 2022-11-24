@@ -1,4 +1,11 @@
-import { asPromise, fileExtension, isBodyInit, toNumber, toResponse } from '../../main/helper.ts'
+import {
+  asPromise,
+  fileExtension,
+  isBodyInit,
+  toArray,
+  toNumber,
+  toResponse,
+} from '../../main/helper.ts'
 import { describe, expect, it, run } from '../deps/x/tincan.ts'
 
 describe('helper integration tests', () => {
@@ -41,6 +48,24 @@ describe('helper integration tests', () => {
       const value = { foo: 'bar' }
       const result = isBodyInit(value)
       expect(result).toEqual(false)
+    })
+  })
+  describe('toArray', () => {
+    it('should return the argument given an array', () => {
+      // Given
+      const ar = ['foo', 'bar']
+      // When
+      const result = toArray(ar)
+      // then
+      expect(result).toBe(ar)
+    })
+    it('should return an array of the argument given non array a value ', () => {
+      // Given
+      const value = 'foo'
+      // When
+      const result = toArray(value)
+      // then
+      expect(result).toEqual([value])
     })
   })
   describe('toNumber', () => {

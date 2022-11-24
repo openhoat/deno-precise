@@ -1,26 +1,34 @@
 import { join } from '../../deps/std.ts'
 import { mime } from '../../deps/x/mimetypes.ts'
-import type { WebServerable } from '../../types/web/web-server.d.ts'
-import type { RequestHandlerSpec, RequestWithRouteParams } from '../../types/web/utils.d.ts'
+import type {
+  Middleware,
+  RequestWithRouteParams,
+  WebServerable,
+} from '../../types/web/web-server.d.ts'
 import { fileExtension } from '../../helper.ts'
+import { Router } from '../router.ts'
 
 type AssetsHandlerOptions = {
   root: string
   prefix?: string
+  index?: boolean
 }
 
-const assets: (options: AssetsHandlerOptions) => RequestHandlerSpec = (options) => {
-  const { prefix = '/assets', root } = options
+const assets: (options: AssetsHandlerOptions) => Middleware = (options) => {
+  const { index, prefix = '/assets', root } = options
   const handler = _internals.buildHandler(root, prefix)
-  return { name: 'assetsHandler', handler, path: `${prefix}/:path` }
+  if (index === false) {
+    return { name: 'assetsHandler', handler, path: `${prefix}/:path` }
+  }
+  const assetsRouter = new Router({ prefix })
+  assetsRouter.register({ name: 'assetsIndexHandler', path: '/', handler })
+  assetsRouter.register({ name: 'assetsHandler', path: '/:path', handler })
+  return assetsRouter
 }
 
 const buildHandler = (root: AssetsHandlerOptions['root'], prefix: string) =>
   async function (this: WebServerable, req: RequestWithRouteParams) {
-    if (typeof req.params?.path !== 'string') {
-      return
-    }
-    const { path } = req.params
+    const path = (typeof req.params?.path === 'string' && req.params?.path) || '/index.html'
     const filepath = join(root, path)
     const mimeType = mime.getType(fileExtension(filepath))
     try {

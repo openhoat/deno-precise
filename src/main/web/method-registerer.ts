@@ -1,6 +1,5 @@
-import type { Registerable, RequestHandler, RequestHandlerSpec } from '../types/web/utils.d.ts'
-import type { Routerable } from '../types/web/router.d.ts'
-import { HttpMethodSpecs } from './utils.ts'
+import type { Middleware, Registerable, RequestHandler } from '../types/web/web-server.d.ts'
+import { HttpMethodSpecs } from './http-method.ts'
 
 abstract class MethodRegisterer<T> implements Registerable<T> {
   all(path: string, handler: RequestHandler) {
@@ -48,7 +47,7 @@ abstract class MethodRegisterer<T> implements Registerable<T> {
     return this
   }
 
-  abstract register(requestHandlerSpec: RequestHandlerSpec | Routerable): T
+  abstract register(middleware: Middleware): T
 
   trace(path: string, handler: RequestHandler) {
     this.register({ handler, method: HttpMethodSpecs.TRACE, path })
