@@ -573,6 +573,8 @@ await webServer.start()
 
 Browse [/assets/index.html](http://localhost:8000/assets/index.html):
 
+> By default `index` options is `true` so that `/assets` is considered as an alias to `/assets/index.html`.
+
 ![](assets/img/sample-page-screenshot.png)
 
 Server logs:
