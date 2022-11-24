@@ -25,6 +25,9 @@ import { BaseWebServer } from './base-web-server.ts'
 import { applyClassMixins } from 'https://deno.land/x/mixins@0.7.4/apply.ts'
 import { BaseWebServerable, BaseWebServerStartOptions } from '../types/web/base-web-server.d.ts'
 
+/**
+ * Web server.
+ */
 class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
@@ -35,6 +38,11 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   readonly #routers: Routerable[] = []
   readonly #server: BaseWebServerable
 
+  /**
+   * Constructor.
+   * @param {WebServerOptions} options
+   * @returns {WebServerable} a new instance of web server
+   */
   constructor(options?: WebServerOptions) {
     super()
     this.#server = new BaseWebServer(this.#prepareHandler.bind(this), options)
@@ -227,9 +235,20 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
 
 applyClassMixins(WebServer, [MethodRegisterer])
 
+/**
+ * Return a string representation of a route.
+ * @param {HttpMethodSpec} method
+ * @param {string | undefined} pathname
+ * @returns {string} string representation of the route
+ */
 const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
   camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
 
+/**
+ * Transform a middleware or a request handler to a middleware.
+ * @param {Middleware | RequestHandler} handler
+ * @returns {Middleware} if a request handler is given, returns a new minimal middleware, else returns the given middleware
+ */
 const toMiddleware = (handler: Middleware | RequestHandler): Middleware => {
   if (typeof handler === 'function') {
     return { handler }

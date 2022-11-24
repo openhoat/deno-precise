@@ -81,6 +81,11 @@ class BaseWebServer implements BaseWebServerable {
   }
 }
 
+/**
+ * Return a valid hostname string to connect to, in case the given hostname is '0.0.0.0'.
+ * @param {string} hostname
+ * @returns {string} hostname or 'localhost' if given hostname is '0.0.0.0'
+ */
 const hostnameForDisplay = (hostname?: string): string => {
   // If the hostname is "0.0.0.0", we display "localhost" in console
   // because browsers in Windows don't resolve "0.0.0.0".
