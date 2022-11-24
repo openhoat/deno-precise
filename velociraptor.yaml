@@ -126,7 +126,52 @@ scripts:
           - vr lint:watch
           - vr format:check:watch
           - vr test:watch
-  'version:update':
-    desc: Update version.json with the latest Git tag
+  version:
+    desc: Get the current version
+    cmd:
+      - |
+        (cat <<END
+        import version from './version.json' assert { type: 'json' }
+        console.log(version)
+        END
+        ) | deno run -
+  'version:init':
+    desc: Init version.json with the latest Git tag
     cmd:
       - echo "\"$(git describe --tags --abbrev=0)\"" > version.json
+  'version:update:major':
+    desc: Increase patch version in version.json
+    cmd:
+      - |
+        VERSION=$((cat <<END
+        import version from './version.json' assert { type: 'json' }
+        const [ major, minor, patch] = version.split('.')
+        const newVersion = [ Number(major) + 1, minor, patch ].join('.')
+        console.log(['', newVersion, ''].join('"'))
+        END
+        ) | deno run -); echo $VERSION > ./version.json
+      - vr version
+  'version:update:minor':
+    desc: Increase patch version in version.json
+    cmd:
+      - |
+        VERSION=$((cat <<END
+        import version from './version.json' assert { type: 'json' }
+        const [ major, minor, patch] = version.split('.')
+        const newVersion = [ major, Number(minor) + 1, patch ].join('.')
+        console.log(['', newVersion, ''].join('"'))
+        END
+        ) | deno run -); echo $VERSION > ./version.json
+      - vr version
+  'version:update:patch':
+    desc: Increase patch version in version.json
+    cmd:
+      - |
+        VERSION=$((cat <<END
+        import version from './version.json' assert { type: 'json' }
+        const [ major, minor, patch] = version.split('.')
+        const newVersion = [ major, minor, Number(patch) + 1 ].join('.')
+        console.log(['', newVersion, ''].join('"'))
+        END
+        ) | deno run -); echo $VERSION > ./version.json
+      - vr version
