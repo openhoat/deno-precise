@@ -30,9 +30,8 @@ Run the server:
 
 ```shell
 $ deno run demo/sample0.ts
-17:259 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
 17:259 [Info    ] Create web server
-17:259 [Info    ] Start server
+17:259 [Info    ] Start web server
 ✅ Granted env access to "PORT".
 ✅ Granted net access to "0.0.0.0:8000".
 19:164 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
@@ -103,9 +102,8 @@ Run the server:
 
 ```shell
 $ deno run demo/sample1.ts
-52:554 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
 52:555 [Info    ] Create web server
-52:555 [Info    ] Start server
+52:555 [Info    ] Start web server
 ✅ Granted env access to "PORT".
 ✅ Granted net access to "0.0.0.0:8000".
 54:220 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
@@ -208,13 +206,12 @@ Run the server:
 
 ```shell
 $ deno run demo/sample2.ts
-26:867 [Info    ] Logging session initialized. Initial logger min log level: Debug (programmatically set)
 26:867 [Info    ] Create web server
 26:867 [Debug   ] Handling signal SIGINT
 26:868 [Debug   ] Handling signal SIGTERM
 26:868 [Debug   ] Handling signal SIGQUIT
 26:868 [Info    ] Type 'kill -s SIGINT 52613' to stop
-26:868 [Info    ] Start server
+26:868 [Info    ] Start web server
 ✅ Granted env access to "PORT".
 ✅ Granted net access to "0.0.0.0:8000".
 28:716 [Debug   ] Trying to bind: port=8000 hostname=0.0.0.0
@@ -235,7 +232,7 @@ Server logs:
 ```text
 …
 58:375 [Warn    ] Received signal SIGINT
-58:376 [Info    ] Stop server
+58:376 [Info    ] Stop web server
 58:378 [Info    ] Logging session complete.  Duration: 31511ms
 $ █
 ```
@@ -299,7 +296,7 @@ Server logs:
 ```text
 51:151 [Info    ] Handle request
 51:151 [Debug   ] Request 'POST /execute/stop' matches route 'POST /execute/:cmd': apply 'handler'
-52:154 [Info    ] Stop server
+52:154 [Info    ] Stop web server
 52:156 [Info    ] Logging session complete.  Duration: 13450ms
 $ █
 ```
@@ -533,23 +530,24 @@ await webServer.start()
 
 ```typescript
 import { TokenReplacer } from 'https://deno.land/x/optic/formatters/tokenReplacer.ts'
-import { longestLevelName, nameToLevel } from 'https://deno.land/x/optic/logger/levels.ts'
-import { Logger } from 'https://deno.land/x/optic/logger/logger.ts'
-import { ConsoleStream } from 'https://deno.land/x/optic/streams/consoleStream.ts'
+import {
+  ConsoleStream,
+  Level,
+  Logger,
+  longestLevelName,
+  TokenReplacer,
+} from 'https://deno.land/x/optic/mod.ts'
 
-const logLevel = nameToLevel(Deno.env.get('LOG_LEVEL') ?? 'Debug')
 const levelPadding = longestLevelName()
-const logger = new Logger()
-  .withMinLogLevel(logLevel)
-  .addStream(
-    new ConsoleStream().withFormat(
-      new TokenReplacer()
-        .withFormat('{dateTime} [{level}] {msg}')
-        .withDateTimeFormat('DD hh:mm:ss:SSS')
-        .withLevelPadding(levelPadding)
-        .withColor(),
-    ),
-  )
+const tokenReplacer = new TokenReplacer()
+  .withFormat('{level} - {msg}')
+  .withLevelPadding(levelPadding)
+  .withColor()
+const consoleStream = new ConsoleStream()
+  .withFormat(tokenReplacer)
+  .withLogHeader(false)
+  .withLogFooter(false)
+const logger = new Logger().withMinLogLevel(Level.Debug).addStream(consoleStream)
 
 export default logger
 ```

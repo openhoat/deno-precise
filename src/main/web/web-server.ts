@@ -215,7 +215,7 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   }
 
   async start(options?: WebServerStartOptions) {
-    this.logger.info('Start server')
+    this.logger.info('Start web server')
     if (this.started) {
       throw new Error('Server is already started')
     }
@@ -251,7 +251,7 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   }
 
   async stop() {
-    this.logger.info('Stop server')
+    this.logger.info('Stop web server')
     const server = this.#server
     if (!isDefinedObject(server)) {
       throw new Error('Server is not started')

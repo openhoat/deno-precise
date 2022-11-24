@@ -1,13 +1,38 @@
 import type { BuildLogger, WebServerDefaults } from '../types/web/defaults.d.ts'
 import type { ErrorHandler, NotFoundHandler } from '../types/web/web-server.d.ts'
 import { Accepts } from '../deps/x/accepts.ts'
-import { ConsoleStream, Level, Logger, longestLevelName, TokenReplacer } from '../deps/x/optic.ts'
+import {
+  ConsoleStream,
+  Logger,
+  longestLevelName,
+  nameToLevel,
+  TokenReplacer,
+} from '../deps/x/optic.ts'
+import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
+
+const buildConsoleStream = () =>
+  Object.freeze(
+    new ConsoleStream()
+      .withFormat(_internals.tokenReplacer)
+      .withLogHeader(false)
+      .withLogFooter(false),
+  )
 
 const buildLogger: BuildLogger = () => {
-  const { buildConsoleStream } = _internals
-  const consoleStream = buildConsoleStream()
-  return Object.freeze(new Logger('Precise').withMinLogLevel(Level.Debug).addStream(consoleStream))
+  const logLevel = nameToLevel(
+    camelCase(Deno.env.get('LOG_LEVEL') ?? 'debug', { pascalCase: true }),
+  )
+  const consoleStream = _internals.buildConsoleStream()
+  return Object.freeze(new Logger('Precise').addStream(consoleStream).withMinLogLevel(logLevel))
 }
+
+const tokenReplacer = Object.freeze(
+  new TokenReplacer()
+    .withFormat('{dateTime} [{level}] {msg}')
+    .withDateTimeFormat('ss:SSS')
+    .withLevelPadding(longestLevelName())
+    .withColor(),
+)
 
 const errorHandler: ErrorHandler = (req, err, context) => {
   if (context.result) {
@@ -87,17 +112,8 @@ const defaults: Readonly<WebServerDefaults> = Object.freeze({
 })
 
 const _internals = {
-  buildConsoleStream: () => {
-    const { tokenReplacer } = _internals
-    return Object.freeze(new ConsoleStream().withFormat(tokenReplacer))
-  },
-  tokenReplacer: Object.freeze(
-    new TokenReplacer()
-      .withFormat('{dateTime} [{level}] {msg}')
-      .withDateTimeFormat('ss:SSS')
-      .withLevelPadding(longestLevelName())
-      .withColor(),
-  ),
+  buildConsoleStream,
+  tokenReplacer,
 }
 
 export { _internals, defaults }

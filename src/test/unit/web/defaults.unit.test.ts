@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it, run } from '../../deps/x/tin
 import { _internals, defaults } from '../../../main/web/defaults.ts'
 import { memberReplacer, noop, stubLogger } from '../../utils.ts'
 
-describe('web defaults integration tests', () => {
+describe('web defaults unit tests', () => {
   let loggerStub: LoggerStub
   beforeAll(() => {
     loggerStub = stubLogger()
@@ -47,9 +47,7 @@ describe('web defaults integration tests', () => {
       expect(logger).toBeInstanceOf(Logger)
       expect(consoleLogSpy.calls).toHaveLength(1)
       expect(consoleLogSpy.calls[0].args).toHaveLength(1)
-      expect(consoleLogSpy.calls[0].args).toMatch(
-        / Info\s+Logging session initialized. Initial logger min log level:/,
-      )
+      expect(consoleLogSpy.calls[0].args).toMatch(/ Info\s+Logging session initialized./)
       assertSpyCall(consoleLogSpy, 0)
     })
   })
