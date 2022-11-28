@@ -183,6 +183,7 @@ Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
 - [x] [Logging](#logging)
 - [x] [Assets / static files](#assets)
 - [x] [Hooks](#hooks)
+- [x] [Cluster support](#cluster)
 
 ### Signals handling
 
@@ -608,7 +609,7 @@ Precise provides hooks to apply side effects or to change the response.
 [`demo/sample10.ts`](demo/sample10.ts):
 
 ```typescript
-import { exposeVersion, WebServer } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import { exposeVersion, WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 webServer.setOnSendHook(exposeVersion())
@@ -638,6 +639,101 @@ x-powered-by: Precise/0.0.16
 }
 
 $ █
+```
+
+### Cluster
+
+Precise provides a cluster component proxifying the requests to workers, an easy way to use multiple CPUs.
+
+[`demo/sample11.ts`](demo/sample11.ts):
+
+```typescript
+import { WebCluster, toNumber } from 'https://deno.land/x/precise/mod.ts'
+
+const concurrency = toNumber(Deno.env.get('WORKERS'))
+const workerUrl = new URL('./sample11-worker.ts', import.meta.url).href
+const webCluster = new WebCluster({ workerUrl, concurrency })
+await webCluster.start()
+```
+
+[`demo/sample11-worker.ts`](demo/sample11-worker.ts):
+
+```typescript
+import { WebServer, WebServerable } from 'https://deno.land/x/precise/mod.ts'
+
+const workerName = self.name
+let webServer: WebServerable
+type Command = (data: MessageEvent['data']) => Promise<void>
+const commands: Record<string, Command> = {
+  start: async (data: { port: number }) => {
+    const { port } = data
+    webServer = new WebServer({ name: workerName, port })
+    webServer.get('/', () => ({ foo: 'bar' }))
+    await webServer.start()
+  },
+  stop: async () => {
+    if (webServer) {
+      await webServer.stop()
+    }
+    self.close()
+  },
+}
+
+self.onmessage = async (evt) => {
+  if (evt.type === 'message') {
+    const command = commands[evt.data.cmd]
+    if (command) {
+      await command(evt.data)
+    }
+  }
+}
+```
+
+> In this example, we use a command pattern in the worker to start and stop the web server
+
+```shell
+$ WORKERS=2 deno run demo/sample11.ts
+03:239 [Info    ] [Cluster] Create web server
+03:266 [Info    ] [Cluster] Start web server
+03:266 [Debug   ] [Cluster] Trying to bind: port=8000 hostname=undefined
+03:267 [Debug   ] [Cluster] Successfuly binded: port=8000 hostname=0.0.0.0
+03:267 [Info    ] [Cluster] Register 'proxyHandler' on route 'ALL *'
+03:267 [Info    ] [Cluster] Web server running. Access it at: http://localhost:8000/
+03:375 [Info    ] [Cluster worker #2] Create web server
+03:376 [Info    ] [Cluster worker #2] Start web server
+03:376 [Debug   ] [Cluster worker #2] Trying to bind: port=8002 hostname=undefined
+03:377 [Debug   ] [Cluster worker #2] Successfuly binded: port=8002 hostname=0.0.0.0
+03:376 [Info    ] [Cluster worker #1] Create web server
+03:377 [Info    ] [Cluster worker #1] Start web server
+03:377 [Debug   ] [Cluster worker #1] Trying to bind: port=8001 hostname=undefined
+03:377 [Debug   ] [Cluster worker #1] Successfuly binded: port=8001 hostname=0.0.0.0
+03:384 [Info    ] [Cluster worker #1] Register 'getHandler' on route 'GET /'
+03:384 [Info    ] [Cluster worker #2] Register 'getHandler' on route 'GET /'
+03:384 [Info    ] [Cluster worker #1] Web server running. Access it at: http://localhost:8001/
+03:384 [Info    ] [Cluster worker #2] Web server running. Access it at: http://localhost:8002/
+```
+
+> Set the concurrency (number of workers) with `WORKERS` env var, or let by defaults and launch as many workers as the available CPU cores.
+
+```shell
+$ http :8000/
+HTTP/1.1 200 OK
+content-type: application/json
+
+{
+    "foo": "bar"
+}
+
+$ █
+```
+
+Server logs:
+
+```shell
+09:374 [Debug   ] [Cluster] Request 'GET /' matches route 'ALL *': apply 'proxyHandler'
+09:374 [Info    ] [Cluster] Proxify to http://localhost:8001
+09:381 [Info    ] [Cluster worker #1] Handle request
+09:381 [Debug   ] [Cluster worker #1] Request 'GET /' matches route 'GET /': apply 'getHandler'
 ```
 
 ## License
