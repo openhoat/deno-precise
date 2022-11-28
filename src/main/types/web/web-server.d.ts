@@ -1,7 +1,8 @@
 import type { ConnInfo } from '../../deps/std.ts'
-import type { Logger } from '../../deps/x/optic.ts'
-import type { Routerable } from './router.d.ts'
+import type { BaseWebServerable, BaseWebServerOptions } from './base-web-server.d.ts'
 import type { HttpMethodSpec } from './http-method.d.ts'
+import type { Registerable } from './method-registerer.d.ts'
+import type { Routerable } from './router.d.ts'
 
 export type ErrorHandler = (
   this: WebServerable,
@@ -51,10 +52,6 @@ export type OnSendHookHandler = (
   connInfo: ConnInfo,
 ) => RequestHandlerResult
 
-export interface Registerable<T> {
-  register(middleware: Middleware): T
-}
-
 export type RequestHandler = (
   this: WebServerable,
   req: RequestWithRouteParams,
@@ -88,36 +85,21 @@ export type RouteHandler = (
   context: RequestHandlerContext,
 ) => RequestHandlerResult
 
-export type WebServerOptions = Partial<{
-  errorHandler: ErrorHandler
-  handlers: Middleware[] | Middleware | RequestHandler
-  hostname: string
-  notFoundHandler: NotFoundHandler
-  logger: Logger
-  port: number
-}>
-
-export interface StaticWebServerable {
-  new (options?: WebServerOptions): WebServerable
-}
-
-export type WebServerStartOptions = Partial<{ syncServe: boolean }>
+export type WebServerOptions = BaseWebServerOptions &
+  Partial<{
+    errorHandler: ErrorHandler
+    handlers: Middleware[] | Middleware | RequestHandler
+    notFoundHandler: NotFoundHandler
+    logRequestHandling: boolean
+  }>
 
 export interface WebServerable
-  extends Registerable<WebServerable>,
+  extends BaseWebServerable,
+    Registerable<WebServerable>,
     MethodRegisterable<WebServerable> {
-  readonly hostname: string | undefined
-  readonly logger: Readonly<Logger>
-  readonly port: number | undefined
-  readonly started: boolean
-
   setErrorHandler(errorHandler: ErrorHandler): void
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
 
   setOnSendHook(hookHandler: OnSendHookHandler): void
-
-  start(options?: WebServerStartOptions): Promise<void>
-
-  stop(): Promise<void>
 }

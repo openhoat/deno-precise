@@ -1,4 +1,5 @@
-import type { Middleware, Registerable, RequestHandler } from '../types/web/web-server.d.ts'
+import type { Registerable } from '../types/web/method-registerer.d.ts'
+import type { Middleware, RequestHandler } from '../types/web/web-server.d.ts'
 import { HttpMethodSpecs } from './http-method.ts'
 
 abstract class MethodRegisterer<T> implements Registerable<T> {

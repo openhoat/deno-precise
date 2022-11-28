@@ -1,6 +1,4 @@
 import type { ConnInfo, Handler } from '../deps/std.ts'
-import { Server } from '../deps/std.ts'
-import { Logger } from '../deps/x/optic.ts'
 import type { HttpMethodSpec } from '../types/web/http-method.d.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
@@ -9,34 +7,25 @@ import type {
   NamedRouteHandler,
   NotFoundHandler,
   OnSendHookHandler,
-  RequestHandlerContext,
   RequestHandler,
+  RequestHandlerContext,
   RequestHandlerResult,
   RequestHandlerSpec,
   ResolvedRequestHandlerResult,
-  StaticWebServerable,
   WebServerable,
   WebServerOptions,
 } from '../types/web/web-server.d.ts'
-import { WebServerStartOptions } from '../types/web/web-server.d.ts'
-import {
-  asPromise,
-  isDefinedObject,
-  isNetAddr,
-  staticImplements,
-  toArray,
-  toNumber,
-  toResponse,
-} from '../helper.ts'
+import { asPromise, toArray, toResponse } from '../helper.ts'
 import { defaults } from './defaults.ts'
 import { isRouter } from './router.ts'
 import { MethodRegisterer } from './method-registerer.ts'
 import { HttpMethodSpecs } from './http-method.ts'
 import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
+import { BaseWebServer } from './base-web-server.ts'
+import { applyClassMixins } from 'https://deno.land/x/mixins@0.7.4/apply.ts'
+import { BaseWebServerable, BaseWebServerStartOptions } from '../types/web/base-web-server.d.ts'
 
-@staticImplements<StaticWebServerable>()
 class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
-  #binded?: Deno.NetAddr
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
   #onSendHookHandler?: OnSendHookHandler
@@ -44,14 +33,11 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   #routeHandlers?: NamedRouteHandler[]
   readonly #requestHandlerSpecs: RequestHandlerSpec[] = []
   readonly #routers: Routerable[] = []
-  #servePromise?: Promise<void>
-  #server?: Server
-  readonly logger: Readonly<Logger>
+  readonly #server: BaseWebServerable
 
   constructor(options?: WebServerOptions) {
     super()
-    this.logger = options?.logger ?? defaults.buildLogger()
-    this.logger.info('Create web server')
+    this.#server = new BaseWebServer(this.prepareServerHandler.bind(this), options)
     this.#options = options
     if (options?.errorHandler) {
       this.setErrorHandler(options.errorHandler)
@@ -66,16 +52,20 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     }
   }
 
-  get hostname(): string | undefined {
-    return this.#binded?.hostname
+  get hostname() {
+    return this.#server.hostname
   }
 
-  get port(): number | undefined {
-    return this.#binded?.port
+  get logger() {
+    return this.#server.logger
   }
 
-  get started(): boolean {
-    return isDefinedObject(this.#server)
+  get port() {
+    return this.#server.port
+  }
+
+  get started() {
+    return this.#server.started
   }
 
   #applyRequestHandler(
@@ -190,6 +180,18 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     return { handler: routeHandler, name: handlerName }
   }
 
+  prepareServerHandler(): Handler {
+    this.#prepareRouteHandlers()
+    return async (req, connInfo): Promise<Response> => {
+      const response = toResponse(await this.#handleRequest(req, connInfo))
+      const onSendHookHandler = this.#onSendHookHandler
+      const hookResponse =
+        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
+      const finalResponse = hookResponse || response
+      return toResponse(finalResponse)
+    }
+  }
+
   register(requestHandlerSpecOrRouter: RequestHandlerSpec | Routerable): WebServerable {
     if (isRouter(requestHandlerSpecOrRouter)) {
       this.#registerRouter(requestHandlerSpecOrRouter)
@@ -214,61 +216,16 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     this.#onSendHookHandler = hookHandler
   }
 
-  async start(options?: WebServerStartOptions) {
-    this.logger.info('Start web server')
-    if (this.started) {
-      throw new Error('Server is already started')
-    }
-    const hostname = this.#options?.hostname
-    const port = toNumber(Deno.env.get('PORT')) ?? this.#options?.port ?? defaults.port
-    this.logger.debug(`Trying to bind: port=${port} hostname=${hostname}`)
-    const listener = Deno.listen({ hostname, port })
-    const binded = isNetAddr(listener.addr) ? listener.addr : undefined
-    if (binded) {
-      this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
-      this.#binded = binded
-    }
-    this.#prepareRouteHandlers()
-    const handler: Handler = async (req, connInfo): Promise<Response> => {
-      const response = toResponse(await this.#handleRequest(req, connInfo))
-      const onSendHookHandler = this.#onSendHookHandler
-      const hookResponse =
-        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
-      const finalResponse = hookResponse || response
-      return toResponse(finalResponse)
-    }
-    const server = new Server({ handler })
-    this.#server = server
-    this.logger.info(
-      `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
-    )
-    const servePromise = server.serve(listener)
-    if (options?.syncServe) {
-      await servePromise
-      return
-    }
-    this.#servePromise = servePromise
+  start(options?: BaseWebServerStartOptions) {
+    return this.#server.start(options)
   }
 
-  async stop() {
-    this.logger.info('Stop web server')
-    const server = this.#server
-    if (!isDefinedObject(server)) {
-      throw new Error('Server is not started')
-    }
-    server.close()
-    await this.#servePromise
-    this.#server = undefined
-    this.#servePromise = undefined
+  stop() {
+    return this.#server.stop()
   }
 }
 
-const hostnameForDisplay = (hostname?: string): string => {
-  // If the hostname is "0.0.0.0", we display "localhost" in console
-  // because browsers in Windows don't resolve "0.0.0.0".
-  // See the discussion in https://github.com/denoland/deno_std/issues/1165
-  return !hostname || hostname === '0.0.0.0' ? 'localhost' : hostname
-}
+applyClassMixins(WebServer, [MethodRegisterer])
 
 const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
   camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
@@ -280,4 +237,4 @@ const toMiddleware = (handler: Middleware | RequestHandler): Middleware => {
   return handler
 }
 
-export { WebServer, hostnameForDisplay, routeToString, toMiddleware }
+export { WebServer, routeToString, toMiddleware }

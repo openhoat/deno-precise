@@ -1,4 +1,5 @@
-import type { MethodRegisterable, Registerable, WebServerable } from './web-server.d.ts'
+import type { Registerable } from './method-registerer.d.ts'
+import type { MethodRegisterable, WebServerable } from './web-server.d.ts'
 
 export type RouterOptions = Partial<{
   prefix: string
@@ -6,5 +7,6 @@ export type RouterOptions = Partial<{
 
 export interface Routerable extends Registerable<Routerable>, MethodRegisterable<Routerable> {
   readonly prefix: string
+
   registerToServer(server: WebServerable, prefix?: string): void
 }
