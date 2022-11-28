@@ -9,30 +9,39 @@ import {
   TokenReplacer,
 } from '../deps/x/optic.ts'
 import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
+import { BuildConsoleStream, BuildTokenReplacer } from '../types/web/defaults.d.ts'
 
-const buildConsoleStream = () =>
+const buildConsoleStream: BuildConsoleStream = (options) =>
   Object.freeze(
     new ConsoleStream()
-      .withFormat(_internals.tokenReplacer)
+      .withFormat(_internals.buildTokenReplacer(options))
       .withLogHeader(false)
       .withLogFooter(false),
   )
 
-const buildLogger: BuildLogger = () => {
+const buildLogger: BuildLogger = (options) => {
   const logLevel = nameToLevel(
     camelCase(Deno.env.get('LOG_LEVEL') ?? 'debug', { pascalCase: true }),
   )
-  const consoleStream = _internals.buildConsoleStream()
-  return Object.freeze(new Logger('Precise').addStream(consoleStream).withMinLogLevel(logLevel))
+  const consoleStream = _internals.buildConsoleStream(options)
+  return Object.freeze(new Logger(options?.name).addStream(consoleStream).withMinLogLevel(logLevel))
 }
 
-const tokenReplacer = Object.freeze(
-  new TokenReplacer()
-    .withFormat('{dateTime} [{level}] {msg}')
-    .withDateTimeFormat('ss:SSS')
-    .withLevelPadding(longestLevelName())
-    .withColor(),
-)
+const buildTokenReplacer: BuildTokenReplacer = (options) => {
+  const formatFields = [
+    '{dateTime}',
+    '[{level}]',
+    options?.name && `[${options.name}]`,
+    '{msg}',
+  ].filter((field) => !!field)
+  return Object.freeze(
+    new TokenReplacer()
+      .withFormat(formatFields.join(' '))
+      .withDateTimeFormat('ss:SSS')
+      .withLevelPadding(longestLevelName())
+      .withColor(),
+  )
+}
 
 const errorHandler: ErrorHandler = (req, err, context) => {
   if (context.result) {
@@ -113,7 +122,7 @@ const defaults: Readonly<WebServerDefaults> = Object.freeze({
 
 const _internals = {
   buildConsoleStream,
-  tokenReplacer,
+  buildTokenReplacer,
 }
 
 export { _internals, defaults }
