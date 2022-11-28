@@ -643,7 +643,7 @@ $ █
 
 ### Cluster
 
-Precise provides a cluster component proxifying the requests to workers, an easy way to use multiple CPUs.
+Precise provides a cluster component proxifying the requests to workers, an easy way to use multiple CPU cores.
 
 [`demo/sample11.ts`](demo/sample11.ts):
 
@@ -713,7 +713,7 @@ $ WORKERS=2 deno run demo/sample11.ts
 03:384 [Info    ] [Cluster worker #2] Web server running. Access it at: http://localhost:8002/
 ```
 
-> Set the concurrency (number of workers) with `WORKERS` env var, or let by defaults and launch as many workers as the available CPU cores.
+> Set the concurrency (number of workers) with `WORKERS` env var, or let by default and launch as many workers as the available CPU cores.
 
 ```shell
 $ http :8000/
@@ -735,6 +735,8 @@ Server logs:
 09:381 [Info    ] [Cluster worker #1] Handle request
 09:381 [Debug   ] [Cluster worker #1] Request 'GET /' matches route 'GET /': apply 'getHandler'
 ```
+
+> The cluster will forward each request to the next worker in a 1..N loop
 
 ## License
 
