@@ -37,7 +37,7 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
 
   constructor(options?: WebServerOptions) {
     super()
-    this.#server = new BaseWebServer(this.prepareServerHandler.bind(this), options)
+    this.#server = new BaseWebServer(this.#prepareHandler.bind(this), options)
     this.#options = options
     if (options?.errorHandler) {
       this.setErrorHandler(options.errorHandler)
@@ -142,6 +142,18 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     return result
   }
 
+  #prepareHandler(): Handler {
+    this.#prepareRouteHandlers()
+    return async (req, connInfo): Promise<Response> => {
+      const response = toResponse(await this.#handleRequest(req, connInfo))
+      const onSendHookHandler = this.#onSendHookHandler
+      const hookResponse =
+        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
+      const finalResponse = hookResponse || response
+      return toResponse(finalResponse)
+    }
+  }
+
   #prepareRouteHandlers() {
     this.#routers.forEach((router) => {
       router.registerToServer(this)
@@ -178,18 +190,6 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
       urlPattern,
     })
     return { handler: routeHandler, name: handlerName }
-  }
-
-  prepareServerHandler(): Handler {
-    this.#prepareRouteHandlers()
-    return async (req, connInfo): Promise<Response> => {
-      const response = toResponse(await this.#handleRequest(req, connInfo))
-      const onSendHookHandler = this.#onSendHookHandler
-      const hookResponse =
-        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
-      const finalResponse = hookResponse || response
-      return toResponse(finalResponse)
-    }
   }
 
   register(requestHandlerSpecOrRouter: RequestHandlerSpec | Routerable): WebServerable {
