@@ -183,7 +183,7 @@ Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
 - [x] [Logging](#logging)
 - [x] [Assets / static files](#assets)
 - [x] [Hooks](#hooks)
-- [x] [Cluster support](#cluster)
+- [x] [Multi CPU cores](#multi-cpu-cores)
 
 ### Signals handling
 
@@ -560,7 +560,7 @@ Precise provides a middleware to serve static files, it takes a `root` folder an
 [`demo/sample9.ts`](demo/sample9.ts):
 
 ```typescript
-import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
+import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.166.0/path/mod.ts'
 import { WebServer, assets } from 'https://deno.land/x/precise/mod.ts'
 
 const __dirname = dirname(fromFileUrl(import.meta.url))
@@ -641,9 +641,16 @@ x-powered-by: Precise/0.0.16
 $ █
 ```
 
-### Cluster
+### Multi CPU cores
 
-Precise provides a cluster component proxifying the requests to workers, an easy way to use multiple CPU cores.
+Precise provides two ways to use multiple CPU cores:
+
+- the first is based on a web cluster component proxifying the requests to workers, an easy way to use multiple CPU cores.
+- the second one is based on request workers
+
+### Web cluster
+
+One front web server acting as a reverse proxy towards multiple backend web servers.
 
 [`demo/sample11.ts`](demo/sample11.ts):
 
@@ -737,6 +744,63 @@ Server logs:
 ```
 
 > The cluster will forward each request to the next worker in a 1..N loop
+
+### Request workers
+
+A middleware wrapping a provided handler into multiple web workers:
+
+- One single server
+- Each request that might be served by your handler is delegated to a worker
+
+[`demo/sample12.ts`](demo/sample12.ts):
+
+```typescript
+import { WebServer, requestWorker } from 'https://deno.land/x/precise/mod.ts'
+
+const webServer = new WebServer()
+const workerUrl = new URL('./sample12-worker.ts', import.meta.url).href
+webServer.register(requestWorker({ concurrency: 3, workerUrl }))
+await webServer.start()
+```
+
+> In this example, we use 3 workers.
+
+[`demo/sample12-worker.ts`](demo/sample12-worker.ts):
+
+```typescript
+/// <reference no-default-lib="true" />
+/// <reference lib="deno.worker" />
+import {
+  defaults,
+  RequestMessage,
+  fromRawRequest,
+  toRawResponse,
+} from 'https://deno.land/x/precise/mod.ts'
+
+const logger = defaults.buildLogger({ name: self.name })
+
+self.onmessage = async (evt) => {
+  const { type } = evt
+  if (type !== 'message') {
+    return
+  }
+  const data: RequestMessage = evt.data
+  if (data.type === 'request') {
+    logger.info('Handling incoming request')
+    const req: Request = fromRawRequest(data.request)
+    const connInfo = data.connInfo
+    const response = await toRawResponse(
+      Response.json({
+        requestHostname: (connInfo.remoteAddr as Deno.NetAddr).hostname,
+        requestUrl: req.url,
+      }),
+    )
+    self.postMessage({ type: 'response', response })
+  }
+}
+```
+
+> Due to the behaviour of Deno workers, the request and response have to be serialized.
 
 ## License
 
