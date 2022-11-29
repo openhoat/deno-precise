@@ -55,6 +55,21 @@ scripts:
       - env
       - run
     watch: true
+  'deps:update':
+    desc: Update the Deno dependencies
+    cmd:
+      - >
+        udd
+        demo/deps/std.ts
+        demo/deps/x/optic.ts
+        src/main/deps/std.ts
+        src/main/deps/x/accepts.ts
+        src/main/deps/x/camelcase.ts
+        src/main/deps/x/free_port.ts
+        src/main/deps/x/mimetypes.ts
+        src/main/deps/x/optic.ts
+        src/test/deps/std.ts
+        src/test/deps/x/tincan.ts
   'format:check':
     cmd: npx prettier --check .
     desc: Format the project sources
@@ -75,6 +90,11 @@ scripts:
       - vr format:check
     desc: Checks sources before commit
     gitHook: pre-commit
+  install:
+    desc: Install all the tools used in the project
+    cmd:
+      - deno install -qAfn vr https://deno.land/x/velociraptor@1.5.0/cli.ts
+      - deno install -qAfn udd https://deno.land/x/udd@0.5.0/main.ts
   lint:
     cmd: deno lint
     desc: Lint the project sources
