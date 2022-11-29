@@ -9,8 +9,8 @@ import {
   WebServer,
   WebServerable,
 } from '../../../mod.ts'
+import { dirname, fromFileUrl, resolve } from '../../main/deps/std.ts'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, run } from '../deps/x/tincan.ts'
-import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.162.0/path/mod.ts'
 
 const __dirname = dirname(fromFileUrl(import.meta.url))
 const assetsBaseDir = resolve(__dirname, 'assets')
