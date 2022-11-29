@@ -1,4 +1,12 @@
 scripts:
+  bench:
+    desc: Run a benchmark test
+    cmd: npx artillery@2.0.0-27 run --quiet --output dist/bench.json bench/scenario1.yaml
+  'bench:report':
+    desc: Create a benchmark HTML report
+    cmd:
+      - npx artillery@2.0.0-27 report dist/bench.json
+      - xdg-open dist/bench.json.html
   clean:
     desc: Clean the dist folder
     cmd: npx rimraf dist

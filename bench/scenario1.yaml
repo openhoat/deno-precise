@@ -1,0 +1,11 @@
+config:
+  target: http://localhost:8000
+  phases:
+    - name: Warm up
+      duration: 30
+      arrivalCount: 500
+scenarios:
+  - name: 'foobar'
+    flow:
+      - get:
+          url: /
