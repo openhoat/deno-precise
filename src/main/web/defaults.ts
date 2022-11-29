@@ -1,6 +1,12 @@
-import type { BuildLogger, WebServerDefaults } from '../types/web/defaults.d.ts'
+import type {
+  BuildConsoleStream,
+  BuildLogger,
+  BuildTokenReplacer,
+  WebServerDefaults,
+} from '../types/web/defaults.d.ts'
 import type { ErrorHandler, NotFoundHandler } from '../types/web/web-server.d.ts'
 import { Accepts } from '../deps/x/accepts.ts'
+import { camelCase } from '../deps/x/camelcase.ts'
 import {
   ConsoleStream,
   Logger,
@@ -8,8 +14,6 @@ import {
   nameToLevel,
   TokenReplacer,
 } from '../deps/x/optic.ts'
-import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
-import { BuildConsoleStream, BuildTokenReplacer } from '../types/web/defaults.d.ts'
 
 const buildConsoleStream: BuildConsoleStream = (options) =>
   Object.freeze(
