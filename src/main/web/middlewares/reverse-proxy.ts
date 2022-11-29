@@ -1,6 +1,6 @@
+import type { ConnInfo } from '../../deps/std.ts'
 import type { BaseWebServerable } from '../../types/web/base-web-server.d.ts'
 import type { RequestHandlerContext, RequestWithRouteParams } from '../../types/web/web-server.d.ts'
-import { ConnInfo } from 'https://deno.land/std@0.162.0/http/server.ts'
 
 type ReverseProxyHandlerOptions = {
   targetHostname: string | ((req: Request) => string)
