@@ -16,7 +16,7 @@ import type {
   WebServerOptions,
 } from '../types/web/web-server.d.ts'
 import { asPromise, toArray, toResponse } from '../helper.ts'
-import { defaults } from './defaults.ts'
+import defaults from './defaults/index.ts'
 import { isRouter } from './router.ts'
 import { MethodRegisterer } from './method-registerer.ts'
 import { HttpMethodSpecs } from './http-method.ts'

@@ -1,7 +1,7 @@
 import type { ConnInfo } from '../../deps/std.ts'
 import type { BaseWebServerable, BaseWebServerOptions } from './base-web-server.d.ts'
 import type { HttpMethodSpec } from './http-method.d.ts'
-import type { Registerable } from './method-registerer.d.ts'
+import type { MethodRegisterable, Registerable } from './method-registerer.d.ts'
 import type { Routerable } from './router.d.ts'
 
 export type ErrorHandler = (
@@ -10,28 +10,6 @@ export type ErrorHandler = (
   err: Error,
   context: RequestHandlerContext,
 ) => RequestHandlerResult
-
-export interface MethodRegisterable<T> {
-  all(path: string, handler: RequestHandler): T
-
-  delete(path: string, handler: RequestHandler): T
-
-  get(path: string, handler: RequestHandler): T
-
-  head(path: string, handler: RequestHandler): T
-
-  options(path: string, handler: RequestHandler): T
-
-  patch(path: string, handler: RequestHandler): T
-
-  post(path: string, handler: RequestHandler): T
-
-  purge(path: string, handler: RequestHandler): T
-
-  put(path: string, handler: RequestHandler): T
-
-  trace(path: string, handler: RequestHandler): T
-}
 
 export type Middleware = RequestHandlerSpec | Routerable
 

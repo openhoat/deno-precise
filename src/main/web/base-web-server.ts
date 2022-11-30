@@ -6,13 +6,12 @@ import type {
   BaseWebServerOptions,
   BaseWebServerStartOptions,
 } from '../types/web/base-web-server.d.ts'
-import type { WebServerOptions } from '../types/web/web-server.d.ts'
-import { isDefinedObject, isNetAddr, toNumber } from '../helper.ts'
-import { defaults } from './defaults.ts'
+import { isNetAddr, toNumber } from '../helper.ts'
+import defaults from './defaults/index.ts'
 
 class BaseWebServer implements BaseWebServerable {
   #binded?: Deno.NetAddr
-  readonly #options?: WebServerOptions
+  readonly #options?: BaseWebServerOptions
   readonly #prepareHandler: (this: BaseWebServerable) => Handler
   #servePromise?: Promise<void>
   #server?: Server
@@ -37,7 +36,7 @@ class BaseWebServer implements BaseWebServerable {
   }
 
   get started(): boolean {
-    return isDefinedObject(this.#server)
+    return !!this.#server && !this.#server.closed
   }
 
   async start(options?: BaseWebServerStartOptions) {
@@ -51,15 +50,15 @@ class BaseWebServer implements BaseWebServerable {
     const listener = Deno.listen({ hostname, port })
     const binded = isNetAddr(listener.addr) ? listener.addr : undefined
     if (binded) {
-      this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
       this.#binded = binded
+      this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
     }
     const handler = this.#prepareHandler()
     const server = new Server({ handler })
-    this.#server = server
     this.logger.info(
       `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
     )
+    this.#server = server
     const servePromise = server.serve(listener)
     if (options?.syncServe) {
       await servePromise
@@ -71,7 +70,7 @@ class BaseWebServer implements BaseWebServerable {
   async stop() {
     this.logger.info('Stop web server')
     const server = this.#server
-    if (!isDefinedObject(server)) {
+    if (!server || server.closed) {
       throw new Error('Server is not started')
     }
     server.close()
