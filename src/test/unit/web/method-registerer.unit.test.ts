@@ -1,9 +1,6 @@
+import type { MethodRegisterable } from '../../../main/types/web/method-registerer.d.ts'
 import type { Routerable } from '../../../main/types/web/router.d.ts'
-import type {
-  MethodRegisterable,
-  RequestHandler,
-  RequestHandlerSpec,
-} from '../../../main/types/web/web-server.d.ts'
+import type { RequestHandler, RequestHandlerSpec } from '../../../main/types/web/web-server.d.ts'
 import { beforeAll, describe, it, run } from '../../deps/x/tincan.ts'
 import { MethodRegisterer } from '../../../main/web/method-registerer.ts'
 import { assertSpyCall, assertSpyCalls, Spy, spy } from '../../deps/std.ts'
