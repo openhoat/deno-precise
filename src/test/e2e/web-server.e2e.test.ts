@@ -57,7 +57,7 @@ describe('API server e2e tests', () => {
         handlers: middlewares,
         logger,
       })
-      webServer.setOnSendHook(exposeVersion())
+      webServer.setHook('onSend', exposeVersion())
     })
     beforeEach(async () => {
       await webServer.start()

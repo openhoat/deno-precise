@@ -5,7 +5,7 @@ const exposeVersion: (name?: string, version?: string) => OnSendHookHandler = (
   name = 'Precise',
   version = preciseVersion,
 ) =>
-  function versionHeader(response) {
+  function versionHeader(_, response) {
     response.headers.set('X-Powered-By', `${name}/${version}`)
   }
 

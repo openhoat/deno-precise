@@ -6,13 +6,13 @@ import type {
   Middleware,
   NamedRouteHandler,
   NotFoundHandler,
-  OnSendHookHandler,
   RequestHandler,
   RequestHandlerContext,
   RequestHandlerResult,
   RequestHandlerSpec,
   ResolvedRequestHandlerResult,
   WebServerable,
+  WebServerHooks,
   WebServerOptions,
 } from '../types/web/web-server.d.ts'
 import { asPromise, toArray, toResponse } from '../helper.ts'
@@ -28,9 +28,11 @@ import { BaseWebServerable, BaseWebServerStartOptions } from '../types/web/base-
  * Web server.
  */
 class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
+  static readonly hookNames: (keyof WebServerHooks)[] = ['onRequest', 'onSend']
+
   #errorHandler: ErrorHandler = defaults.errorHandler
   #notFoundHandler: NotFoundHandler = defaults.notFoundHandler
-  #onSendHookHandler?: OnSendHookHandler
+  readonly #hooks: WebServerHooks = {}
   readonly #options?: WebServerOptions
   #routeHandlers?: NamedRouteHandler[]
   readonly #requestHandlerSpecs: RequestHandlerSpec[] = []
@@ -152,10 +154,15 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   #prepareHandler(): Handler {
     this.#prepareRouteHandlers()
     return async (req, connInfo): Promise<Response> => {
+      const onRequestHookHandler = this.#hooks.onRequest
+      if (onRequestHookHandler) {
+        await asPromise(onRequestHookHandler.call(this, req, { connInfo }))
+      }
       const response = toResponse(await this.#handleRequest(req, connInfo))
-      const onSendHookHandler = this.#onSendHookHandler
+      const onSendHookHandler = this.#hooks.onSend
       const hookResponse =
-        onSendHookHandler && (await asPromise(onSendHookHandler(response, req, connInfo)))
+        onSendHookHandler &&
+        (await asPromise(onSendHookHandler.call(this, req, response, { connInfo })))
       const finalResponse = hookResponse || response
       return toResponse(finalResponse)
     }
@@ -213,14 +220,19 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     this.#errorHandler = errorHandler
   }
 
+  setHook<T extends keyof WebServerHooks>(name: T, hookHandler: Required<WebServerHooks>[T]) {
+    if (!WebServer.hookNames.includes(name)) {
+      this.logger.warn(`Hook '${name}' is not supported: ignore`)
+      return false
+    }
+    this.logger.debug(`Set '${name}' hook (name: ${hookHandler.name})`)
+    this.#hooks[name] = hookHandler
+    return true
+  }
+
   setNotFoundHandler(notFoundHandler: NotFoundHandler) {
     this.logger.debug(`Set not found handler (name: ${notFoundHandler.name})`)
     this.#notFoundHandler = notFoundHandler
-  }
-
-  setOnSendHook(hookHandler: OnSendHookHandler) {
-    this.logger.debug(`Set 'onSend' hook (name: ${hookHandler.name})`)
-    this.#onSendHookHandler = hookHandler
   }
 
   start(options?: BaseWebServerStartOptions) {

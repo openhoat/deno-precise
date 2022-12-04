@@ -18,16 +18,13 @@ export interface NamedRouteHandler {
   name: string
 }
 
-export type NotFoundHandler = (
-  this: WebServerable,
-  req: RequestWithRouteParams,
-  context: RequestHandlerContext,
-) => RequestHandlerResult
+export type NotFoundHandler = RequestHandler
 
 export type OnSendHookHandler = (
-  response: Response,
+  this: WebServerable,
   req: RequestWithRouteParams,
-  connInfo: ConnInfo,
+  res: Response,
+  context: RequestHandlerContext,
 ) => RequestHandlerResult
 
 export type RequestHandler = (
@@ -79,5 +76,13 @@ export interface WebServerable
 
   setNotFoundHandler(notFoundHandler: NotFoundHandler): void
 
-  setOnSendHook(hookHandler: OnSendHookHandler): void
+  setHook<T extends keyof WebServerHooks>(
+    name: T,
+    hookHandler: Required<WebServerHooks>[T],
+  ): boolean
+}
+
+export interface WebServerHooks {
+  onRequest?: RequestHandler
+  onSend?: OnSendHookHandler
 }
