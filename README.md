@@ -606,13 +606,29 @@ $ █
 
 Precise provides hooks to apply side effects or to change the response.
 
+Currently supported hooks:
+
+- onRequest: triggered as soon as the request is served
+- onSend: triggered just before sending a response
+
 [`demo/sample10.ts`](demo/sample10.ts):
 
 ```typescript
-import { exposeVersion, WebServer } from 'https://deno.land/x/precise/mod.ts'
+import {
+  exposeVersion,
+  RequestWithRouteParams,
+  WebServer,
+  WebServerable,
+} from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
-webServer.setOnSendHook(exposeVersion())
+webServer.setHook('onSend', exposeVersion())
+webServer.setHook(
+  'onRequest',
+  function requestNotifier(this: WebServerable, req: RequestWithRouteParams) {
+    this.logger.warn(`New incoming request: url=${req.url}`)
+  },
+)
 webServer.register({
   path: '/',
   handler: () => ({ foo: 'bar' }),
@@ -620,10 +636,13 @@ webServer.register({
 await webServer.start()
 ```
 
-> In this example, we use a provided 'exposeVersion' middleware to change the response headers juste before sending
-> response to the client. Feel free to use your own…
+> In this example, we use a provided 'exposeVersion' middleware as an `onSend` hook to change the
+> response headers juste before sending response to the client. Feel free to use your own…
 >
 > By default `exposeVersion` use `name` and `version` of Precise.
+>
+> The `onRequest` hook is dedicated for some side effects about the request, don't use it to send a
+> response (prefer a middleware, route, or request handler for that).
 
 ```shell
 $ http :8000/

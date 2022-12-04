@@ -15,5 +15,5 @@ const webServer = new WebServer({
     assets({ root: assetsBaseDir }),
   ],
 })
-webServer.setOnSendHook(exposeVersion())
+webServer.setHook('onSend', exposeVersion())
 await webServer.start()
