@@ -3,6 +3,8 @@ export const asPromise = <T>(result: Promise<T> | T): Promise<T> =>
 
 export const fileExtension = (filename: string) => lastIndex(filename.split('.'))
 
+export const isArray = <T>(o: T | T[]): o is T[] => typeof o === 'object' && !!o && 'length' in o
+
 export const isBodyInit = (value: unknown): value is BodyInit => {
   return (
     typeof value === 'string' ||
@@ -21,8 +23,7 @@ export const isPromise = <T>(result: Promise<T> | T): result is Promise<T> =>
 
 export const lastIndex = <T>(a: T[]): T => a[a.length - 1]
 
-export const toArray = <T>(o: T | T[]): T[] =>
-  typeof o === 'object' && o && 'length' in o ? o : [o]
+export const toArray = <T>(o: T | T[]): T[] => (isArray(o) ? o : [o])
 
 export const toNumber = (s: unknown): number | undefined => {
   if (typeof s === 'undefined' || (typeof s === 'object' && !s)) {
