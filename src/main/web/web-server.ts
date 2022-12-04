@@ -22,7 +22,6 @@ import { MethodRegisterer } from './method-registerer.ts'
 import { HttpMethodSpecs } from './http-method.ts'
 import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
 import { BaseWebServer } from './base-web-server.ts'
-import { applyClassMixins } from 'https://deno.land/x/mixins@0.7.4/apply.ts'
 import { BaseWebServerable, BaseWebServerStartOptions } from '../types/web/base-web-server.d.ts'
 
 /**
@@ -232,8 +231,6 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     return this.#server.stop()
   }
 }
-
-applyClassMixins(WebServer, [MethodRegisterer])
 
 /**
  * Return a string representation of a route.
