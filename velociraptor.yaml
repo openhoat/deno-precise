@@ -65,19 +65,7 @@ scripts:
     watch: true
   'deps:update':
     desc: Update the Deno dependencies
-    cmd:
-      - >
-        udd
-        demo/deps/std.ts
-        demo/deps/x/optic.ts
-        src/main/deps/std.ts
-        src/main/deps/x/accepts.ts
-        src/main/deps/x/camelcase.ts
-        src/main/deps/x/free_port.ts
-        src/main/deps/x/mimetypes.ts
-        src/main/deps/x/optic.ts
-        src/test/deps/std.ts
-        src/test/deps/x/tincan.ts
+    cmd: udd $(find . \( -path "./demo/*" -or -path "./src/*" \) -path "*/deps/*" -type f -name "*.ts")
   'format:check':
     cmd: npx prettier --check .
     desc: Format the project sources
