@@ -1,4 +1,8 @@
 import type { ConnInfo, Handler } from '../deps/std.ts'
+import type {
+  BaseWebServerable,
+  BaseWebServerStartOptions,
+} from '../types/web/base-web-server.d.ts'
 import type { HttpMethodSpec } from '../types/web/http-method.d.ts'
 import type { Routerable } from '../types/web/router.d.ts'
 import type {
@@ -15,14 +19,13 @@ import type {
   WebServerHooks,
   WebServerOptions,
 } from '../types/web/web-server.d.ts'
+import { camelCase } from '../deps/x/camelcase.ts'
 import { asPromise, toArray, toResponse } from '../helper.ts'
-import defaults from './defaults/index.ts'
-import { isRouter } from './router.ts'
-import { MethodRegisterer } from './method-registerer.ts'
-import { HttpMethodSpecs } from './http-method.ts'
-import { camelCase } from 'https://deno.land/x/camelcase@v2.1.0/mod.ts'
 import { BaseWebServer } from './base-web-server.ts'
-import { BaseWebServerable, BaseWebServerStartOptions } from '../types/web/base-web-server.d.ts'
+import defaults from './defaults/index.ts'
+import { HttpMethodSpecs } from './http-method.ts'
+import { MethodRegisterer } from './method-registerer.ts'
+import { isRouter } from './router.ts'
 
 /**
  * Web server.
