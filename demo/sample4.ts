@@ -8,7 +8,8 @@ webServer.setErrorHandler((req, err, context) => {
   return Response.json(
     {
       code: 'INTERNAL_SERVER',
-      message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+      message:
+        `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
     },
     { status: 500 },
   )
@@ -20,7 +21,7 @@ webServer.setNotFoundHandler((req) =>
       message: `Resource '${req.method} ${req.url}' not found.`,
     },
     { status: 404 },
-  ),
+  )
 )
 webServer.register({
   path: '/oops',

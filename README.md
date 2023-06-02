@@ -90,13 +90,16 @@ await new WebServer().get('/', () => ({ foo: 'bar' })).start()
 > A request handler can return either:
 >
 > - nothing: the server will not send any response.
-> - a [JSON literal object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
->   the server will send a JSON content HTTP response.
-> - a [BodyInit](https://deno.land/api@v1.27.2?s=BodyInit): the server will send a wrapped response on top of the
->   provided body.
-> - a [Response](https://deno.com/deploy/docs/runtime-response): the server will send the given response.
-> - [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) of the aboves:
->   the server will resolve the promise and apply the aboves strategies.
+> - a
+  > [JSON literal object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
+  > the server will send a JSON content HTTP response.
+> - a [BodyInit](https://deno.land/api@v1.27.2?s=BodyInit): the server will send
+  > a wrapped response on top of the provided body.
+> - a [Response](https://deno.com/deploy/docs/runtime-response): the server will
+  > send the given response.
+> - [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+  > of the aboves: the server will resolve the promise and apply the aboves
+  > strategies.
 
 Run the server:
 
@@ -145,19 +148,22 @@ Server logs:
 
 ## Why
 
-This project has been created because of the lack of a stop method in Http Deno and the others third party modules.
+This project has been created because of the lack of a stop method in Http Deno
+and the others third party modules.
 
-I wanted a simple web server service, that starts, registers, and stops, and don't want to deal with 2 imbricated async
-iterator loops ([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
+I wanted a simple web server service, that starts, registers, and stops, and
+don't want to deal with 2 imbricated async iterator loops
+([serving-http](https://deno.land/manual@v1.26.2/runtime/http_server_apis_low_level#serving-http)).
 
-This project was created with some strong principles in mind, which can be mainly summarized
-by [DX](https://developerexperience.io/):
+This project was created with some strong principles in mind, which can be
+mainly summarized by [DX](https://developerexperience.io/):
 
 - Quality
 - Testing
 - Clean and easy understandable API
 - Async / Promise compliant everywhere
-- Robust: all is done to be sure that in any situation the server will have a fair behaviour and will report enough logs
+- Robust: all is done to be sure that in any situation the server will have a
+  fair behaviour and will report enough logs
 
 ## Deploy
 
@@ -166,8 +172,10 @@ Precise supports [Deno deploy](https://deno.com/deploy) out-of-the-box.
 Live demo:
 
 - hello route: [precise.deno.dev/hello](https://precise.deno.dev/hello)
-- HTML file: [precise.deno.dev/assets/index.html](https://precise.deno.dev/assets/index.html)
-- TXT file: [precise.deno.dev/assets/hello.txt](https://precise.deno.dev/assets/hello.txt)
+- HTML file:
+  [precise.deno.dev/assets/index.html](https://precise.deno.dev/assets/index.html)
+- TXT file:
+  [precise.deno.dev/assets/hello.txt](https://precise.deno.dev/assets/hello.txt)
 - not found fallback: [precise.deno.dev/oops](https://precise.deno.dev/oops)
 
 Have a look at the source: [`demo/deno_deploy.ts`](demo/deno_deploy.ts).
@@ -192,7 +200,10 @@ Use signals handling to gracefully shutdown the web server.
 [`demo/sample2.ts`](demo/sample2.ts):
 
 ```typescript
-import { WebServer, shutdownOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import {
+  shutdownOnSignals,
+  WebServer,
+} from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 shutdownOnSignals(webServer)
@@ -238,8 +249,8 @@ Server logs:
 $ █
 ```
 
-> The server is properly stopped without the need to Deno.exit(),
-> so that it can be used cleanly into end-to-end tests.
+> The server is properly stopped without the need to Deno.exit(), so that it can
+> be used cleanly into end-to-end tests.
 
 ### Route params
 
@@ -248,7 +259,10 @@ Handle routes parameters:
 [`demo/sample3.ts`](demo/sample3.ts):
 
 ```typescript
-import { WebServer, shutdownOnSignals } from 'https://deno.land/x/precise/mod.ts'
+import {
+  shutdownOnSignals,
+  WebServer,
+} from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 shutdownOnSignals(webServer)
@@ -321,7 +335,8 @@ webServer.setErrorHandler((req, err, context) => {
   return Response.json(
     {
       code: 'INTERNAL_SERVER',
-      message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+      message:
+        `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
     },
     { status: 500 },
   )
@@ -333,7 +348,7 @@ webServer.setNotFoundHandler((req) =>
       message: `Resource '${req.method} ${req.url}' not found.`,
     },
     { status: 404 },
-  ),
+  )
 )
 webServer.register({
   path: '/oops',
@@ -390,7 +405,8 @@ await new WebServer({
     return Response.json(
       {
         code: 'INTERNAL_SERVER',
-        message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+        message:
+          `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
       },
       { status: 500 },
     )
@@ -414,15 +430,19 @@ await new WebServer({
 
 ### Middlewares
 
-Route request handlers are part of a middlewares list enabled when the server is started.
+Route request handlers are part of a middlewares list enabled when the server is
+started.
 
-The server will pass the request to each registered middleware in the order of their registration, then fallback to the
-special 'not found' handler if no response was sent.
+The server will pass the request to each registered middleware in the order of
+their registration, then fallback to the special 'not found' handler if no
+response was sent.
 
-In case of error in any handler, the server will pass the request to the special error handler.
+In case of error in any handler, the server will pass the request to the special
+error handler.
 
-In the middlewares chain, each handler is executed, even if the response has already been sent ; it's the responsability
-of the handler to check it and return sooner if the response was already sent.
+In the middlewares chain, each handler is executed, even if the response has
+already been sent ; it's the responsability of the handler to check it and
+return sooner if the response was already sent.
 
 To register a middleware handling all routes, simply omit the `path`.
 
@@ -513,9 +533,11 @@ export { v1Router }
 
 ### Logging
 
-The web server comes with an embedded default logger based on [optic](https://deno.land/x/optic).
+The web server comes with an embedded default logger based on
+[optic](https://deno.land/x/optic).
 
-If you need to customize logging, just pass your custom logger into the web server options.
+If you need to customize logging, just pass your custom logger into the web
+server options.
 
 [`demo/sample8.ts`](demo/sample8.ts):
 
@@ -548,20 +570,27 @@ const consoleStream = new ConsoleStream()
   .withFormat(tokenReplacer)
   .withLogHeader(false)
   .withLogFooter(false)
-const logger = new Logger().withMinLogLevel(Level.Debug).addStream(consoleStream)
+const logger = new Logger().withMinLogLevel(Level.Debug).addStream(
+  consoleStream,
+)
 
 export default logger
 ```
 
 ### Assets
 
-Precise provides a middleware to serve static files, it takes a `root` folder and an optional `prefix`.
+Precise provides a middleware to serve static files, it takes a `root` folder
+and an optional `prefix`.
 
 [`demo/sample9.ts`](demo/sample9.ts):
 
 ```typescript
-import { dirname, fromFileUrl, resolve } from 'https://deno.land/std@0.166.0/path/mod.ts'
-import { WebServer, assets } from 'https://deno.land/x/precise/mod.ts'
+import {
+  dirname,
+  fromFileUrl,
+  resolve,
+} from 'https://deno.land/std@0.166.0/path/mod.ts'
+import { assets, WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 const __dirname = dirname(fromFileUrl(import.meta.url))
 const assetsBaseDir = resolve(__dirname, 'assets')
@@ -572,7 +601,8 @@ await webServer.start()
 
 Browse [/assets/index.html](http://localhost:8000/assets/index.html):
 
-> By default `index` options is `true` so that `/assets` is considered as an alias to `/assets/index.html`.
+> By default `index` options is `true` so that `/assets` is considered as an
+> alias to `/assets/index.html`.
 
 ![](assets/img/sample-page-screenshot.png)
 
@@ -587,7 +617,8 @@ Server logs:
 59:788 [Debug   ] Successfuly served static file from '/assets/logo.png'
 ```
 
-Mime type is computed based on file extension: [/assets/hello.txt](http://localhost:8000/assets/hello.txt)
+Mime type is computed based on file extension:
+[/assets/hello.txt](http://localhost:8000/assets/hello.txt)
 
 ```shell
 $ http :8000/assets/hello.txt
@@ -636,13 +667,15 @@ webServer.register({
 await webServer.start()
 ```
 
-> In this example, we use a provided 'exposeVersion' middleware as an `onSend` hook to change the
-> response headers juste before sending response to the client. Feel free to use your own…
+> In this example, we use a provided 'exposeVersion' middleware as an `onSend`
+> hook to change the response headers juste before sending response to the
+> client. Feel free to use your own…
 >
 > By default `exposeVersion` use `name` and `version` of Precise.
 >
-> The `onRequest` hook is dedicated for some side effects about the request, don't use it to send a
-> response (prefer a middleware, route, or request handler for that).
+> The `onRequest` hook is dedicated for some side effects about the request,
+> don't use it to send a response (prefer a middleware, route, or request
+> handler for that).
 
 ```shell
 $ http :8000/
@@ -664,17 +697,19 @@ $ █
 
 Precise provides two ways to use multiple CPU cores:
 
-- the first is based on a web cluster component proxifying the requests to workers, an easy way to use multiple CPU cores.
+- the first is based on a web cluster component proxifying the requests to
+  workers, an easy way to use multiple CPU cores.
 - the second one is based on request workers
 
 ### Web cluster
 
-One front web server acting as a reverse proxy towards multiple backend web servers.
+One front web server acting as a reverse proxy towards multiple backend web
+servers.
 
 [`demo/sample11.ts`](demo/sample11.ts):
 
 ```typescript
-import { WebCluster, toNumber } from 'https://deno.land/x/precise/mod.ts'
+import { toNumber, WebCluster } from 'https://deno.land/x/precise/mod.ts'
 
 const concurrency = toNumber(Deno.env.get('WORKERS'))
 const workerUrl = new URL('./sample11-worker.ts', import.meta.url).href
@@ -715,7 +750,8 @@ self.onmessage = async (evt) => {
 }
 ```
 
-> In this example, we use a command pattern in the worker to start and stop the web server
+> In this example, we use a command pattern in the worker to start and stop the
+> web server
 
 ```shell
 $ WORKERS=2 deno run demo/sample11.ts
@@ -739,7 +775,8 @@ $ WORKERS=2 deno run demo/sample11.ts
 03:384 [Info    ] [Cluster worker #2] Web server running. Access it at: http://localhost:8002/
 ```
 
-> Set the concurrency (number of workers) with `WORKERS` env var, or let by default and launch as many workers as the available CPU cores.
+> Set the concurrency (number of workers) with `WORKERS` env var, or let by
+> default and launch as many workers as the available CPU cores.
 
 ```shell
 $ http :8000/
@@ -774,7 +811,7 @@ A middleware wrapping a provided handler into multiple web workers:
 [`demo/sample12.ts`](demo/sample12.ts):
 
 ```typescript
-import { WebServer, requestWorker } from 'https://deno.land/x/precise/mod.ts'
+import { requestWorker, WebServer } from 'https://deno.land/x/precise/mod.ts'
 
 const webServer = new WebServer()
 const workerUrl = new URL('./sample12-worker.ts', import.meta.url).href
@@ -791,8 +828,8 @@ await webServer.start()
 /// <reference lib="deno.worker" />
 import {
   defaults,
-  RequestMessage,
   fromRawRequest,
+  RequestMessage,
   toRawResponse,
 } from 'https://deno.land/x/precise/mod.ts'
 
@@ -819,7 +856,8 @@ self.onmessage = async (evt) => {
 }
 ```
 
-> Due to the behaviour of Deno workers, the request and response have to be serialized.
+> Due to the behaviour of Deno workers, the request and response have to be
+> serialized.
 
 ## License
 

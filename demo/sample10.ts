@@ -1,4 +1,9 @@
-import { exposeVersion, RequestWithRouteParams, WebServer, WebServerable } from '../mod.ts'
+import {
+  exposeVersion,
+  RequestWithRouteParams,
+  WebServer,
+  WebServerable,
+} from '../mod.ts'
 
 const webServer = new WebServer()
 webServer.setHook('onSend', exposeVersion())

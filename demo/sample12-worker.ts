@@ -1,7 +1,12 @@
 /// <reference no-default-lib="true" />
 /// <reference lib="deno.worker" />
 
-import { defaults, RequestMessage, fromRawRequest, toRawResponse } from '../mod.ts'
+import {
+  defaults,
+  fromRawRequest,
+  RequestMessage,
+  toRawResponse,
+} from '../mod.ts'
 
 const logger = defaults.buildLogger({ name: self.name })
 

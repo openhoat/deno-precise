@@ -8,7 +8,8 @@ await new WebServer({
     return Response.json(
       {
         code: 'INTERNAL_SERVER',
-        message: `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
+        message:
+          `Error encountered in request '${req.method} ${req.url}': ${err.message}.`,
       },
       { status: 500 },
     )

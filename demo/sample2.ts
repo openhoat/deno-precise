@@ -1,4 +1,4 @@
-import { WebServer, shutdownOnSignals } from '../mod.ts'
+import { shutdownOnSignals, WebServer } from '../mod.ts'
 
 const webServer = new WebServer()
 shutdownOnSignals(webServer)
