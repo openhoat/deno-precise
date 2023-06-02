@@ -1,7 +1,9 @@
 {
   "fmt": {
-    "options": {
-      "singleQuote": true
-    }
+    "semiColons": false,
+    "singleQuote": true
+  },
+  "tasks": {
+    "install": "deno install --root .deno -fqAn vr https://deno.land/x/velociraptor@1.5.0/cli.ts && .deno/bin/vr install"
   }
 }
