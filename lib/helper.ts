@@ -1,9 +1,11 @@
 export const asPromise = <T>(result: Promise<T> | T): Promise<T> =>
   isPromise(result) ? result : Promise.resolve(result)
 
-export const fileExtension = (filename: string) => lastIndex(filename.split('.'))
+export const fileExtension = (filename: string) =>
+  lastIndex(filename.split('.'))
 
-export const isArray = <T>(o: T | T[]): o is T[] => typeof o === 'object' && !!o && 'length' in o
+export const isArray = <T>(o: T | T[]): o is T[] =>
+  typeof o === 'object' && !!o && 'length' in o
 
 export const isBodyInit = (value: unknown): value is BodyInit => {
   return (
@@ -16,10 +18,12 @@ export const isBodyInit = (value: unknown): value is BodyInit => {
   )
 }
 
-export const isNetAddr = (addr: Deno.Addr): addr is Deno.NetAddr => 'port' in addr
+export const isNetAddr = (addr: Deno.Addr): addr is Deno.NetAddr =>
+  'port' in addr
 
 export const isPromise = <T>(result: Promise<T> | T): result is Promise<T> =>
-  result && typeof result === 'object' && typeof (result as Promise<void>).then === 'function'
+  result && typeof result === 'object' &&
+  typeof (result as Promise<void>).then === 'function'
 
 export const lastIndex = <T>(a: T[]): T => a[a.length - 1]
 

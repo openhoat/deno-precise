@@ -25,10 +25,11 @@ const _internals = {
     }
     _internals.addSignalListener(signal, signalHandler)
   },
-  terminateSignalHandler: (webServer: WebServerable) => async (signal: Deno.Signal) => {
-    webServer.logger.warn(`Received signal ${signal}`)
-    await webServer.stop()
-  },
+  terminateSignalHandler:
+    (webServer: WebServerable) => async (signal: Deno.Signal) => {
+      webServer.logger.warn(`Received signal ${signal}`)
+      await webServer.stop()
+    },
 }
 
 export { _internals, shutdownOnSignals }

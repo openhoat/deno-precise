@@ -1,4 +1,4 @@
-import type { Logger } from '../../deps/x/optic.ts'
+import type { Logger } from '../../../deps/x/optic.ts'
 
 export type BaseWebServerOptions = Partial<{
   hostname: string

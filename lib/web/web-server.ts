@@ -1,4 +1,4 @@
-import type { ConnInfo, Handler } from '../deps/std.ts'
+import type { ConnInfo, Handler } from '../../deps/std.ts'
 import type {
   BaseWebServerable,
   BaseWebServerStartOptions,
@@ -19,7 +19,7 @@ import type {
   WebServerHooks,
   WebServerOptions,
 } from '../types/web/web-server.d.ts'
-import { camelCase } from '../deps/x/camelcase.ts'
+import { camelCase } from '../../deps/x/camelcase.ts'
 import { asPromise, toArray, toResponse } from '../helper.ts'
 import { BaseWebServer } from './base-web-server.ts'
 import defaults from './defaults/index.ts'
@@ -30,7 +30,8 @@ import { isRouter } from './router.ts'
 /**
  * Web server.
  */
-class WebServer extends MethodRegisterer<WebServerable> implements WebServerable {
+class WebServer extends MethodRegisterer<WebServerable>
+  implements WebServerable {
   static readonly hookNames: (keyof WebServerHooks)[] = ['onRequest', 'onSend']
 
   #errorHandler: ErrorHandler = defaults.errorHandler
@@ -107,8 +108,11 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
   }): RequestHandler {
     return (req, responseSent) => {
       const { pathname: requestPathname } = new URL(req.url)
-      const urlMatch = urlPattern ? urlPattern.exec({ pathname: requestPathname }) : true
-      const methodMatch = methodToMatch === HttpMethodSpecs.ALL || req.method === methodToMatch
+      const urlMatch = urlPattern
+        ? urlPattern.exec({ pathname: requestPathname })
+        : true
+      const methodMatch = methodToMatch === HttpMethodSpecs.ALL ||
+        req.method === methodToMatch
       const requestMatch = methodMatch && urlMatch
       if (!requestMatch) {
         this.logger.debug(
@@ -130,21 +134,29 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     }
   }
 
-  async #handleRequest(req: Request, connInfo: ConnInfo): Promise<ResolvedRequestHandlerResult> {
+  async #handleRequest(
+    req: Request,
+    connInfo: ConnInfo,
+  ): Promise<ResolvedRequestHandlerResult> {
     this.logger.info('Handle request')
     const routeHandlers = this.#routeHandlers
-    const result: RequestHandlerResult =
-      routeHandlers?.length &&
+    const result: RequestHandlerResult = routeHandlers?.length &&
       (await routeHandlers.reduce(async (promise, requestHandler) => {
         const lastResult = await asPromise(promise)
-        const requestResult = await this.#applyRequestHandler(req, requestHandler, {
-          connInfo,
-          result: lastResult,
-        })
+        const requestResult = await this.#applyRequestHandler(
+          req,
+          requestHandler,
+          {
+            connInfo,
+            result: lastResult,
+          },
+        )
         return requestResult ?? lastResult
       }, undefined as RequestHandlerResult))
     if (!result) {
-      this.logger.debug('No response sent by routes: fallback to not found handler')
+      this.logger.debug(
+        'No response sent by routes: fallback to not found handler',
+      )
       return this.#applyRequestHandler(
         req,
         { handler: this.#notFoundHandler, name: this.#notFoundHandler.name },
@@ -163,9 +175,10 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
       }
       const response = toResponse(await this.#handleRequest(req, connInfo))
       const onSendHookHandler = this.#hooks.onSend
-      const hookResponse =
-        onSendHookHandler &&
-        (await asPromise(onSendHookHandler.call(this, req, response, { connInfo })))
+      const hookResponse = onSendHookHandler &&
+        (await asPromise(
+          onSendHookHandler.call(this, req, response, { connInfo }),
+        ))
       const finalResponse = hookResponse || response
       return toResponse(finalResponse)
     }
@@ -176,7 +189,7 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
       router.registerToServer(this)
     })
     this.#routeHandlers = this.#requestHandlerSpecs.map((requestHandlerSpec) =>
-      this.#toNamedRouteHandler(requestHandlerSpec),
+      this.#toNamedRouteHandler(requestHandlerSpec)
     )
   }
 
@@ -188,19 +201,38 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     this.#routers.push(router)
   }
 
-  #toNamedRouteHandler(requestHandlerSpec: RequestHandlerSpec): NamedRouteHandler {
+  #toNamedRouteHandler(
+    requestHandlerSpec: RequestHandlerSpec,
+  ): NamedRouteHandler {
     const {
       handler,
       method,
       name = requestHandlerSpec.handler.name,
+      onRequest,
       path: pathname,
     } = requestHandlerSpec
     const urlPattern = pathname ? new URLPattern({ pathname }) : undefined
-    const methodToMatch = urlPattern ? method || HttpMethodSpecs.GET : HttpMethodSpecs.ALL
-    const handlerName = name || `${routeToString(methodToMatch, pathname)}Handler`
-    this.logger.info(`Register '${handlerName}' on route '${methodToMatch} ${pathname || '*'}'`)
+    const methodToMatch = urlPattern
+      ? method || HttpMethodSpecs.GET
+      : HttpMethodSpecs.ALL
+    const handlerName = name ||
+      `${routeToString(methodToMatch, pathname)}Handler`
+    this.logger.info(
+      `Register '${handlerName}' on route '${methodToMatch} ${
+        pathname || '*'
+      }'`,
+    )
+    const finalHandler: RequestHandler = onRequest
+      ? async function (this, req, context) {
+        const hookResponse = await onRequest.call(this, req, context)
+        if (hookResponse) {
+          return hookResponse
+        }
+        return handler.call(this, req, context)
+      }
+      : handler
     const routeHandler: RequestHandler = this.#buildRouteHandler({
-      handler,
+      handler: finalHandler,
       handlerName,
       methodToMatch,
       pathname,
@@ -209,7 +241,9 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     return { handler: routeHandler, name: handlerName }
   }
 
-  register(requestHandlerSpecOrRouter: RequestHandlerSpec | Routerable): WebServerable {
+  register(
+    requestHandlerSpecOrRouter: RequestHandlerSpec | Routerable,
+  ): WebServerable {
     if (isRouter(requestHandlerSpecOrRouter)) {
       this.#registerRouter(requestHandlerSpecOrRouter)
     } else {
@@ -223,7 +257,10 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
     this.#errorHandler = errorHandler
   }
 
-  setHook<T extends keyof WebServerHooks>(name: T, hookHandler: Required<WebServerHooks>[T]) {
+  setHook<T extends keyof WebServerHooks>(
+    name: T,
+    hookHandler: Required<WebServerHooks>[T],
+  ) {
     if (!WebServer.hookNames.includes(name)) {
       this.logger.warn(`Hook '${name}' is not supported: ignore`)
       return false
@@ -253,8 +290,10 @@ class WebServer extends MethodRegisterer<WebServerable> implements WebServerable
  * @param {string | undefined} pathname
  * @returns {string} string representation of the route
  */
-const routeToString = (method: HttpMethodSpec, pathname: string | undefined): string =>
-  camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
+const routeToString = (
+  method: HttpMethodSpec,
+  pathname: string | undefined,
+): string => camelCase(`${method}_${(pathname || 'all').replaceAll('/', '_')}`)
 
 /**
  * Transform a middleware or a request handler to a middleware.
@@ -268,4 +307,4 @@ const toMiddleware = (handler: Middleware | RequestHandler): Middleware => {
   return handler
 }
 
-export { WebServer, routeToString, toMiddleware }
+export { routeToString, toMiddleware, WebServer }

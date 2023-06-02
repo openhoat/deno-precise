@@ -1,5 +1,9 @@
 import type { Routerable, RouterOptions } from '../types/web/router.d.ts'
-import type { Middleware, RequestHandlerSpec, WebServerable } from '../types/web/web-server.d.ts'
+import type {
+  Middleware,
+  RequestHandlerSpec,
+  WebServerable,
+} from '../types/web/web-server.d.ts'
 import { MethodRegisterer } from './method-registerer.ts'
 
 const isRouter = (o: unknown): o is Routerable => o instanceof Router
@@ -36,4 +40,4 @@ class Router extends MethodRegisterer<Routerable> implements Routerable {
   }
 }
 
-export { Router, isRouter }
+export { isRouter, Router }

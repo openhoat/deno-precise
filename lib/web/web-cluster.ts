@@ -1,5 +1,8 @@
 import type { BaseWebServerStartOptions } from '../types/web/base-web-server.d.ts'
-import type { WebClusterOptions, WorkerMessage } from '../types/web/web-cluster.d.ts'
+import type {
+  WebClusterOptions,
+  WorkerMessage,
+} from '../types/web/web-cluster.d.ts'
 import { BaseWebServer } from './base-web-server.ts'
 import { reverseProxy } from './middlewares/reverse-proxy.ts'
 

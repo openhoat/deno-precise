@@ -1,5 +1,8 @@
-import type { ConnInfo } from '../../deps/std.ts'
-import type { BaseWebServerable, BaseWebServerOptions } from './base-web-server.d.ts'
+import type { ConnInfo } from '../../../deps/std.ts'
+import type {
+  BaseWebServerable,
+  BaseWebServerOptions,
+} from './base-web-server.d.ts'
 import type { HttpMethodSpec } from './http-method.d.ts'
 import type { MethodRegisterable, Registerable } from './method-registerer.d.ts'
 import type { Routerable } from './router.d.ts'
@@ -46,11 +49,12 @@ export interface RequestHandlerSpec {
   handler: RequestHandler
   method?: HttpMethodSpec
   name?: string
+  onRequest?: RequestHandler
   path?: string
 }
 
 export interface RequestWithRouteParams extends Request {
-  params?: Record<string, string>
+  params?: Record<string, string | undefined>
 }
 
 export type ResolvedRequestHandlerResult = Response | BodyInit | unknown | void
@@ -60,8 +64,9 @@ export type RouteHandler = (
   context: RequestHandlerContext,
 ) => RequestHandlerResult
 
-export type WebServerOptions = BaseWebServerOptions &
-  Partial<{
+export type WebServerOptions =
+  & BaseWebServerOptions
+  & Partial<{
     errorHandler: ErrorHandler
     handlers: Middleware[] | Middleware | RequestHandler
     notFoundHandler: NotFoundHandler
@@ -69,7 +74,8 @@ export type WebServerOptions = BaseWebServerOptions &
   }>
 
 export interface WebServerable
-  extends BaseWebServerable,
+  extends
+    BaseWebServerable,
     Registerable<WebServerable>,
     MethodRegisterable<WebServerable> {
   setErrorHandler(errorHandler: ErrorHandler): void

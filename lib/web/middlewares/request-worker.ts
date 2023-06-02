@@ -8,7 +8,10 @@ import type { RequestHandlerSpec } from '../../types/web/web-server.d.ts'
 import { RequestHandler } from '../../types/web/web-server.d.ts'
 
 const toRawHeaders = (headers: Headers): HeadersInit =>
-  Array.from(headers.entries()).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
+  Array.from(headers.entries()).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: value }),
+    {},
+  )
 const toRawRequest = async (req: Request): Promise<RawRequest> => {
   const { method, headers, url } = req
   const body = req.body && (await req.json())
@@ -26,7 +29,8 @@ const toRawResponse = async (res: Response): Promise<RawResponse> => {
   return { body, headers: toRawHeaders(headers), status }
 }
 
-const fromRawResponse = (jsonRes: RawResponse) => new Response(jsonRes.body, jsonRes)
+const fromRawResponse = (jsonRes: RawResponse) =>
+  new Response(jsonRes.body, jsonRes)
 
 const noCpus = navigator.hardwareConcurrency
 
@@ -36,7 +40,11 @@ const requestWorker: (options: {
 }) => RequestHandlerSpec = (options) => {
   const { concurrency = noCpus, workerUrl } = options
   const workers = Array.from(Array(concurrency)).map(
-    (_, index) => new Worker(workerUrl, { name: `request worker #${index + 1}`, type: 'module' }),
+    (_, index) =>
+      new Worker(workerUrl, {
+        name: `request worker #${index + 1}`,
+        type: 'module',
+      }),
   )
   let workerIndex = 0
   const handler: RequestHandler = async (req, context) => {
@@ -67,4 +75,11 @@ const requestWorker: (options: {
   return { handler }
 }
 
-export { fromRawRequest, fromRawResponse, requestWorker, toRawHeaders, toRawRequest, toRawResponse }
+export {
+  fromRawRequest,
+  fromRawResponse,
+  requestWorker,
+  toRawHeaders,
+  toRawRequest,
+  toRawResponse,
+}

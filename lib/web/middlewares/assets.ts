@@ -1,5 +1,5 @@
-import { join } from '../../deps/std.ts'
-import { mime } from '../../deps/x/mimetypes.ts'
+import { join } from '../../../deps/std.ts'
+import { mime } from '../../../deps/x/mimetypes.ts'
 import type {
   Middleware,
   RequestWithRouteParams,
@@ -28,12 +28,15 @@ const assets: (options: AssetsHandlerOptions) => Middleware = (options) => {
 
 const buildHandler = (root: AssetsHandlerOptions['root'], prefix: string) =>
   async function (this: WebServerable, req: RequestWithRouteParams) {
-    const path = (typeof req.params?.path === 'string' && req.params?.path) || '/index.html'
+    const path = (typeof req.params?.path === 'string' && req.params?.path) ||
+      '/index.html'
     const filepath = join(root, path)
     const mimeType = mime.getType(fileExtension(filepath))
     try {
       const content = await Deno.readFile(filepath)
-      this.logger.debug(`Successfuly served static file from '${join(prefix, path)}'`)
+      this.logger.debug(
+        `Successfuly served static file from '${join(prefix, path)}'`,
+      )
       return new Response(content, {
         headers: { ...(mimeType ? { 'Content-Type': mimeType } : {}) },
       })

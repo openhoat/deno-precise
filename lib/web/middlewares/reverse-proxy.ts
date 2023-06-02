@@ -1,6 +1,9 @@
-import type { ConnInfo } from '../../deps/std.ts'
+import type { ConnInfo } from '../../../deps/std.ts'
 import type { BaseWebServerable } from '../../types/web/base-web-server.d.ts'
-import type { RequestHandlerContext, RequestWithRouteParams } from '../../types/web/web-server.d.ts'
+import type {
+  RequestHandlerContext,
+  RequestWithRouteParams,
+} from '../../types/web/web-server.d.ts'
 
 type ReverseProxyHandlerOptions = {
   targetHostname: string | ((req: Request) => string)
@@ -19,12 +22,12 @@ const reverseProxy: (
     req: Request,
     context: RequestHandlerContext | ConnInfo,
   ) {
-    const hostname =
-      typeof options.targetHostname === 'function'
-        ? options.targetHostname(req)
-        : options.targetHostname
-    const port =
-      typeof options.targetPort === 'function' ? options.targetPort(req) : options.targetPort
+    const hostname = typeof options.targetHostname === 'function'
+      ? options.targetHostname(req)
+      : options.targetHostname
+    const port = typeof options.targetPort === 'function'
+      ? options.targetPort(req)
+      : options.targetPort
     const url = `http://${hostname}:${port}`
     const connInfo = 'connInfo' in context ? context.connInfo : context
     const forwardedFor = [

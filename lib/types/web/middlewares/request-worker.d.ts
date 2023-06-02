@@ -1,4 +1,4 @@
-import type { ConnInfo } from '../../../deps/std.ts'
+import type { ConnInfo } from '../../../../deps/std.ts'
 
 export type RawRequest = {
   body: ArrayBuffer

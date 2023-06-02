@@ -1,6 +1,6 @@
-import type { Handler } from '../deps/std.ts'
-import { Server } from '../deps/std.ts'
-import { Logger } from '../deps/x/optic.ts'
+import type { Handler } from '../../deps/std.ts'
+import { Server } from '../../deps/std.ts'
+import { Logger } from '../../deps/x/optic.ts'
 import type {
   BaseWebServerable,
   BaseWebServerOptions,
@@ -22,7 +22,8 @@ class BaseWebServer implements BaseWebServerable {
     options?: BaseWebServerOptions,
   ) {
     this.#prepareHandler = prepareHandler
-    this.logger = options?.logger ?? defaults.buildLogger({ name: options?.name })
+    this.logger = options?.logger ??
+      defaults.buildLogger({ name: options?.name })
     this.logger.info('Create web server')
     this.#options = options
   }
@@ -45,18 +46,23 @@ class BaseWebServer implements BaseWebServerable {
       throw new Error('Server is already started')
     }
     const hostname = this.#options?.hostname
-    const port = toNumber(Deno.env.get('PORT')) ?? this.#options?.port ?? defaults.port
+    const port = toNumber(Deno.env.get('PORT')) ?? this.#options?.port ??
+      defaults.port
     this.logger.debug(`Trying to bind: port=${port} hostname=${hostname}`)
     const listener = Deno.listen({ hostname, port })
     const binded = isNetAddr(listener.addr) ? listener.addr : undefined
     if (binded) {
       this.#binded = binded
-      this.logger.debug(`Successfuly binded: port=${binded.port} hostname=${binded.hostname}`)
+      this.logger.debug(
+        `Successfuly binded: port=${binded.port} hostname=${binded.hostname}`,
+      )
     }
     const handler = this.#prepareHandler()
     const server = new Server({ handler })
     this.logger.info(
-      `Web server running. Access it at: http://${hostnameForDisplay(hostname)}:${port}/`,
+      `Web server running. Access it at: http://${
+        hostnameForDisplay(hostname)
+      }:${port}/`,
     )
     this.#server = server
     const servePromise = server.serve(listener)
