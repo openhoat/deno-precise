@@ -3,10 +3,17 @@ import type {
   RequestHandlerContext,
   RequestWithRouteParams,
   WebServerable,
-} from '../../../../main/types/web/web-server.d.ts'
-import { afterAll, beforeAll, describe, expect, it, run } from '../../../deps/x/tincan.ts'
+} from '../../../../lib/types/web/web-server.d.ts'
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  run,
+} from '../../../../deps/test/x/tincan.ts'
 import { stubLogger } from '../../../utils.ts'
-import { notFoundHandler } from '../../../../main/web/defaults/not-found-middleware.ts'
+import { notFoundHandler } from '../../../../lib/web/defaults/not-found-middleware.ts'
 
 describe('web defaults not found middleware unit tests', () => {
   let loggerStub: LoggerStub
@@ -20,7 +27,9 @@ describe('web defaults not found middleware unit tests', () => {
     it('should return a JSON response given the request accepts JSON', () => {
       // Given
       const jsonMimeType = 'application/json'
-      const webServer = { logger: loggerStub.logger } as unknown as WebServerable
+      const webServer = {
+        logger: loggerStub.logger,
+      } as unknown as WebServerable
       const req = {
         headers: new Headers({ accept: jsonMimeType }),
       } as RequestWithRouteParams
@@ -37,7 +46,9 @@ describe('web defaults not found middleware unit tests', () => {
     it('should return a text response given the request accepts text', () => {
       // Given
       const textMimeType = 'text/plain'
-      const webServer = { logger: loggerStub.logger } as unknown as WebServerable
+      const webServer = {
+        logger: loggerStub.logger,
+      } as unknown as WebServerable
       const req = {
         headers: new Headers({ accept: textMimeType }),
       } as RequestWithRouteParams
@@ -48,13 +59,17 @@ describe('web defaults not found middleware unit tests', () => {
       expect(result).toBeTruthy()
       expect(result).toBeInstanceOf(Response)
       if (result instanceof Response) {
-        expect(result.headers.get('content-type')).toEqual(`${textMimeType};charset=UTF-8`)
+        expect(result.headers.get('content-type')).toEqual(
+          `${textMimeType};charset=UTF-8`,
+        )
       }
     })
     it('should return a HTML response given the request accepts nothing', () => {
       // Given
       const textMimeType = 'text/html'
-      const webServer = { logger: loggerStub.logger } as unknown as WebServerable
+      const webServer = {
+        logger: loggerStub.logger,
+      } as unknown as WebServerable
       const req = { headers: new Headers() } as RequestWithRouteParams
       const context = {} as RequestHandlerContext
       // When

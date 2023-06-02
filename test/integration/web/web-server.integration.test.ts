@@ -1,10 +1,10 @@
-import type { HttpMethodSpec } from '../../../main/types/web/http-method.d.ts'
-import type { Routerable } from '../../../main/types/web/router.d.ts'
-import type { RequestHandlerSpec } from '../../../main/types/web/web-server.d.ts'
-import { describe, expect, it, run } from '../../deps/x/tincan.ts'
-import { HttpMethodSpecs } from '../../../main/web/http-method.ts'
-import { routeToString, toMiddleware } from '../../../main/web/web-server.ts'
-import { Router } from '../../../main/web/router.ts'
+import type { HttpMethodSpec } from '../../../lib/types/web/http-method.d.ts'
+import type { Routerable } from '../../../lib/types/web/router.d.ts'
+import type { RequestHandlerSpec } from '../../../lib/types/web/web-server.d.ts'
+import { describe, expect, it, run } from '../../../deps/test/x/tincan.ts'
+import { HttpMethodSpecs } from '../../../lib/web/http-method.ts'
+import { routeToString, toMiddleware } from '../../../lib/web/web-server.ts'
+import { Router } from '../../../lib/web/router.ts'
 
 describe('web server integration tests', () => {
   describe('routeToString', () => {

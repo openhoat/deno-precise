@@ -1,4 +1,4 @@
-import { Level, Logger } from '../../main/deps/x/optic.ts'
+import { Level, Logger } from '../../deps/x/optic.ts'
 import {
   assets,
   exposeVersion,
@@ -8,9 +8,17 @@ import {
   version,
   WebServer,
   WebServerable,
-} from '../../../mod.ts'
-import { dirname, fromFileUrl, resolve } from '../../main/deps/std.ts'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, run } from '../deps/x/tincan.ts'
+} from '../../mod.ts'
+import { dirname, fromFileUrl, resolve } from '../../deps/std.ts'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  run,
+} from '../../deps/test/x/tincan.ts'
 
 const __dirname = dirname(fromFileUrl(import.meta.url))
 const assetsBaseDir = resolve(__dirname, 'assets')
@@ -67,19 +75,34 @@ describe('API server e2e tests', () => {
         await webServer.stop()
       }
     })
-    usecases.forEach(({ expectedStatusCode, expectedBody, method, path, requestPath, type }) => {
-      const expectedBodyString = type === 'json' ? JSON.stringify(expectedBody) : expectedBody
-      it(`should respond '${expectedBodyString}', given a '${method || 'GET'} ${
-        requestPath || path
-      }' request`, async () => {
-        const url = `http://localhost:${webServer.port}${requestPath || path}`
-        const response = await fetch(url, { method })
-        expect(response.status).toEqual(expectedStatusCode || 200)
-        expect(response.headers.get('X-Powered-By')).toEqual(`Precise/${version}`)
-        const result = type === 'json' ? await response.json() : await response.text()
-        expect(result).toEqual(expectedBody)
-      })
-    })
+    usecases.forEach(
+      (
+        { expectedStatusCode, expectedBody, method, path, requestPath, type },
+      ) => {
+        const expectedBodyString = type === 'json'
+          ? JSON.stringify(expectedBody)
+          : expectedBody
+        it(
+          `should respond '${expectedBodyString}', given a '${
+            method || 'GET'
+          } ${requestPath || path}' request`,
+          async () => {
+            const url = `http://localhost:${webServer.port}${
+              requestPath || path
+            }`
+            const response = await fetch(url, { method })
+            expect(response.status).toEqual(expectedStatusCode || 200)
+            expect(response.headers.get('X-Powered-By')).toEqual(
+              `Precise/${version}`,
+            )
+            const result = type === 'json'
+              ? await response.json()
+              : await response.text()
+            expect(result).toEqual(expectedBody)
+          },
+        )
+      },
+    )
   })
 })
 

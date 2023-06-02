@@ -1,8 +1,19 @@
-import type { Routerable } from '../../../main/types/web/router.d.ts'
-import type { WebServerable } from '../../../main/types/web/web-server.d.ts'
-import { beforeAll, describe, expect, it, run } from '../../deps/x/tincan.ts'
-import { isRouter, Router } from '../../../main/web/router.ts'
-import { assertSpyCall, assertSpyCalls, spy, stub } from '../../deps/std.ts'
+import type { Routerable } from '../../../lib/types/web/router.d.ts'
+import type { WebServerable } from '../../../lib/types/web/web-server.d.ts'
+import {
+  beforeAll,
+  describe,
+  expect,
+  it,
+  run,
+} from '../../../deps/test/x/tincan.ts'
+import { isRouter, Router } from '../../../lib/web/router.ts'
+import {
+  assertSpyCall,
+  assertSpyCalls,
+  spy,
+  stub,
+} from '../../../deps/test/std.ts'
 
 describe('web router unit tests', () => {
   describe('isRouter', () => {
@@ -33,12 +44,20 @@ describe('web router unit tests', () => {
         it('should register routes to server given a router and a request handler spec', () => {
           // Given
           const serverRegister = spy()
-          const server = { register: serverRegister } as unknown as WebServerable
+          const server = {
+            register: serverRegister,
+          } as unknown as WebServerable
           const anotherRouter = new Router({ prefix: '/test' })
-          const anotherRouterRegisterToServerStub = stub(anotherRouter, 'registerToServer')
+          const anotherRouterRegisterToServerStub = stub(
+            anotherRouter,
+            'registerToServer',
+          )
           const handler = spy()
           // When
-          const result = [router.register(anotherRouter), router.register({ handler })]
+          const result = [
+            router.register(anotherRouter),
+            router.register({ handler }),
+          ]
           router.registerToServer(server, '/foo')
           // Then
           expect(result).toEqual([router, router])

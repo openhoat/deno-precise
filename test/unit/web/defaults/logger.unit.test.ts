@@ -1,9 +1,16 @@
-import type { Spy } from '../../../deps/std.ts'
+import type { Spy } from '../../../../deps/test/std.ts'
 import type { LoggerStub } from '../../../types/utils.d.ts'
-import { assertSpyCall, stub } from '../../../deps/std.ts'
-import { ConsoleStream, Logger } from '../../../../main/deps/x/optic.ts'
-import { afterAll, beforeAll, describe, expect, it, run } from '../../../deps/x/tincan.ts'
-import { _internals, buildLogger } from '../../../../main/web/defaults/logger.ts'
+import { assertSpyCall, stub } from '../../../../deps/test/std.ts'
+import { ConsoleStream, Logger } from '../../../../deps/x/optic.ts'
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  run,
+} from '../../../../deps/test/x/tincan.ts'
+import { _internals, buildLogger } from '../../../../lib/web/defaults/logger.ts'
 import { memberReplacer, noop, stubLogger } from '../../../utils.ts'
 
 describe('web defaults logger unit tests', () => {
@@ -42,7 +49,9 @@ describe('web defaults logger unit tests', () => {
       expect(logger).toBeInstanceOf(Logger)
       expect(consoleLogSpy.calls).toHaveLength(1)
       expect(consoleLogSpy.calls[0].args).toHaveLength(1)
-      expect(consoleLogSpy.calls[0].args).toMatch(/ Info\s+Logging session initialized./)
+      expect(consoleLogSpy.calls[0].args).toMatch(
+        / Info\s+Logging session initialized./,
+      )
       assertSpyCall(consoleLogSpy, 0)
     })
   })

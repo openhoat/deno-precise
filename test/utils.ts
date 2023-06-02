@@ -1,9 +1,13 @@
 import type { StubLogger } from './types/utils.d.ts'
-import type { Stub } from './deps/std.ts'
-import { setImmediate, stub } from './deps/std.ts'
-import { ConsoleStream, Logger } from '../main/deps/x/optic.ts'
+import type { Stub } from '../deps/test/std.ts'
+import { setImmediate, stub } from '../deps/test/std.ts'
+import { ConsoleStream, Logger } from '../deps/x/optic.ts'
 
-export type AsyncIterator<T, U> = (item: T, index: number, ar: T[]) => Promise<U>
+export type AsyncIterator<T, U> = (
+  item: T,
+  index: number,
+  ar: T[],
+) => Promise<U>
 
 export const doNextTick = async (fn: () => void): Promise<void> => {
   await new Promise((resolve) => {
@@ -14,7 +18,10 @@ export const doNextTick = async (fn: () => void): Promise<void> => {
   })
 }
 
-export const eachAsync = <T>(array: T[], iterator: AsyncIterator<T, void>): Promise<void> =>
+export const eachAsync = <T>(
+  array: T[],
+  iterator: AsyncIterator<T, void>,
+): Promise<void> =>
   array.reduce<Promise<void>>(
     (p, item, index, ar) =>
       p.then(async () => {
@@ -43,12 +50,18 @@ export const stubLogger: StubLogger = () => {
   return { logger, restore, stubs }
 }
 
-export const memberReplacer = (o: Record<string, unknown>, values: Record<string, unknown>) => {
-  const save = Object.keys(values).reduce<Record<string, unknown>>((acc, key) => {
-    Object.assign(acc, { [key]: o[key] })
-    o[key] = values[key]
-    return acc
-  }, {})
+export const memberReplacer = (
+  o: Record<string, unknown>,
+  values: Record<string, unknown>,
+) => {
+  const save = Object.keys(values).reduce<Record<string, unknown>>(
+    (acc, key) => {
+      Object.assign(acc, { [key]: o[key] })
+      o[key] = values[key]
+      return acc
+    },
+    {},
+  )
   return () => {
     Object.keys(save).forEach((key) => {
       o[key] = save[key]

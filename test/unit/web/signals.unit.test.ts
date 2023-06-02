@@ -1,8 +1,14 @@
-import type { WebServerable } from '../../../main/types/web/web-server.d.ts'
+import type { WebServerable } from '../../../lib/types/web/web-server.d.ts'
 import type { LoggerStub } from '../../types/utils.d.ts'
-import { assertSpyCalls, Spy, spy } from '../../deps/std.ts'
-import { afterAll, beforeAll, describe, it, run } from '../../deps/x/tincan.ts'
-import { _internals, shutdownOnSignals } from '../../../main/web/signals.ts'
+import { assertSpyCalls, Spy, spy } from '../../../deps/test/std.ts'
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  it,
+  run,
+} from '../../../deps/test/x/tincan.ts'
+import { _internals, shutdownOnSignals } from '../../../lib/web/signals.ts'
 import { doNextTick, memberReplacer, stubLogger } from '../../utils.ts'
 
 describe('web signals unit tests', () => {

@@ -5,8 +5,8 @@ import {
   toArray,
   toNumber,
   toResponse,
-} from '../../main/helper.ts'
-import { describe, expect, it, run } from '../deps/x/tincan.ts'
+} from '../../lib/helper.ts'
+import { describe, expect, it, run } from '../../deps/test/x/tincan.ts'
 
 describe('helper integration tests', () => {
   describe('asPromise', () => {
@@ -44,7 +44,7 @@ describe('helper integration tests', () => {
       const result = isBodyInit(value)
       expect(result).toEqual(true)
     })
-    it("should return false, given { foo: 'bar' }", () => {
+    it('should return false, given { foo: \'bar\' }', () => {
       const value = { foo: 'bar' }
       const result = isBodyInit(value)
       expect(result).toEqual(false)

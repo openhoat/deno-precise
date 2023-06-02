@@ -1,13 +1,24 @@
-import type { MethodRegisterable } from '../../../main/types/web/method-registerer.d.ts'
-import type { Routerable } from '../../../main/types/web/router.d.ts'
-import type { RequestHandler, RequestHandlerSpec } from '../../../main/types/web/web-server.d.ts'
-import { beforeAll, describe, it, run } from '../../deps/x/tincan.ts'
-import { MethodRegisterer } from '../../../main/web/method-registerer.ts'
-import { assertSpyCall, assertSpyCalls, Spy, spy } from '../../deps/std.ts'
-import { HttpMethodSpecs } from '../../../main/web/http-method.ts'
+import type { MethodRegisterable } from '../../../lib/types/web/method-registerer.d.ts'
+import type { Routerable } from '../../../lib/types/web/router.d.ts'
+import type {
+  RequestHandler,
+  RequestHandlerSpec,
+} from '../../../lib/types/web/web-server.d.ts'
+import { beforeAll, describe, it, run } from '../../../deps/test/x/tincan.ts'
+import { MethodRegisterer } from '../../../lib/web/method-registerer.ts'
+import {
+  assertSpyCall,
+  assertSpyCalls,
+  Spy,
+  spy,
+} from '../../../deps/test/std.ts'
+import { HttpMethodSpecs } from '../../../lib/web/http-method.ts'
 
 describe('web method registerer unit tests', () => {
-  let registerSpy: Spy<MethodRegisterer<void>, [RequestHandlerSpec | Routerable]>
+  let registerSpy: Spy<
+    MethodRegisterer<void>,
+    [RequestHandlerSpec | Routerable]
+  >
 
   class TestMethodRegisterer extends MethodRegisterer<void> {
     register(requestHandlerSpec: RequestHandlerSpec | Routerable) {
@@ -29,10 +40,18 @@ describe('web method registerer unit tests', () => {
         { name: 'delete', method: HttpMethodSpecs.DELETE, path: '/hello' },
         { name: 'get', method: HttpMethodSpecs.GET, path: '/foo/bar' },
         { name: 'head', method: HttpMethodSpecs.HEAD, path: '/foo/hello' },
-        { name: 'options', method: HttpMethodSpecs.OPTIONS, path: '/foo/world' },
+        {
+          name: 'options',
+          method: HttpMethodSpecs.OPTIONS,
+          path: '/foo/world',
+        },
         { name: 'patch', method: HttpMethodSpecs.PATCH, path: '/hello' },
         { name: 'post', method: HttpMethodSpecs.POST, path: '/hello/world' },
-        { name: 'purge', method: HttpMethodSpecs.PURGE, path: '/hello/world/bar' },
+        {
+          name: 'purge',
+          method: HttpMethodSpecs.PURGE,
+          path: '/hello/world/bar',
+        },
         { name: 'put', method: HttpMethodSpecs.PUT, path: '/world' },
         { name: 'trace', method: HttpMethodSpecs.TRACE, path: '/world/foo' },
       ]

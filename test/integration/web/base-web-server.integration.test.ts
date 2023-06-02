@@ -1,5 +1,5 @@
-import { describe, expect, it, run } from '../../deps/x/tincan.ts'
-import { hostnameForDisplay } from '../../../main/web/base-web-server.ts'
+import { describe, expect, it, run } from '../../../deps/test/x/tincan.ts'
+import { hostnameForDisplay } from '../../../lib/web/base-web-server.ts'
 
 describe('base web server integration tests', () => {
   describe('hostnameForDisplay', () => {

@@ -1,12 +1,22 @@
-import { afterAll, describe, expect, it, run } from '../../../deps/x/tincan.ts'
+import {
+  afterAll,
+  describe,
+  expect,
+  it,
+  run,
+} from '../../../../deps/test/x/tincan.ts'
 import {
   _internals,
   assets,
   AssetsHandlerOptions,
-} from '../../../../main/web/middlewares/assets.ts'
+} from '../../../../lib/web/middlewares/assets.ts'
 import { memberReplacer, noop } from '../../../utils.ts'
-import { assertSpyCall, assertSpyCalls, spy } from '../../../deps/std.ts'
-import { isRouter, Router } from '../../../../main/web/router.ts'
+import {
+  assertSpyCall,
+  assertSpyCalls,
+  spy,
+} from '../../../../deps/test/std.ts'
+import { isRouter, Router } from '../../../../lib/web/router.ts'
 
 describe('web middlewares assets unit tests', () => {
   describe('assets', () => {
@@ -18,7 +28,9 @@ describe('web middlewares assets unit tests', () => {
       // Given
       const options: AssetsHandlerOptions = { root: '/tmp' }
       const buildHandlerSpy = spy(() => noop)
-      internalsRestore = memberReplacer(_internals, { buildHandler: buildHandlerSpy })
+      internalsRestore = memberReplacer(_internals, {
+        buildHandler: buildHandlerSpy,
+      })
       // When
       const result = assets(options)
       // Then
@@ -39,7 +51,9 @@ describe('web middlewares assets unit tests', () => {
       // Given
       const options: AssetsHandlerOptions = { root: '/tmp', index: false }
       const buildHandlerSpy = spy(() => noop)
-      internalsRestore = memberReplacer(_internals, { buildHandler: buildHandlerSpy })
+      internalsRestore = memberReplacer(_internals, {
+        buildHandler: buildHandlerSpy,
+      })
       // When
       const result = assets(options)
       // Then
